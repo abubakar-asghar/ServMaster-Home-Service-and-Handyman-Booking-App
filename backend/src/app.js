@@ -21,13 +21,13 @@ import reviewRoutes from "./routes/review.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 
 app.use("/api/admin", adminRoutes);
-app.use("/api/customer", customerRoutes);
-app.use("/api/serviceprovider", serviceProviderRoutes);
-app.use("/api/servicecategory", serviceCategoryRoutes);
-app.use("/api/subservice", subServiceRoutes);
-app.use("/api/servicerequest", serviceRequestRoutes);
-app.use("/api/review", reviewRoutes);
-app.use("/api/chat", chatRoutes);
+app.use("/api/customers", customerRoutes);
+app.use("/api/service-providers", serviceProviderRoutes);
+app.use("/api/service-categories", serviceCategoryRoutes);
+app.use("/api/sub-services", subServiceRoutes);
+app.use("/api/service-requests", serviceRequestRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/chats", chatRoutes);
 
 // Middleware for Errors
 app.use(errorMiddleware);

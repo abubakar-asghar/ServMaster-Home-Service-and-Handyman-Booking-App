@@ -1,6 +1,16 @@
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import ServiceProvider from "../models/serviceProvider.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
+
+
+// Generate JWT Token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+};
 
 // @desc    Register a new service provider
 // @route   POST /api/service-providers/register
@@ -27,12 +37,16 @@ export const registerServiceProvider = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler("Service provider already exists", 400));
   }
 
+  // Hash password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
   // Create new service provider
   const serviceProvider = await ServiceProvider.create({
     name,
     email,
     phone,
-    password,
+    password: hashedPassword,
     service_types,
     sub_services,
     experience,
@@ -44,10 +58,61 @@ export const registerServiceProvider = asyncHandler(async (req, res, next) => {
     profile_image: "https://example.com/default-profile.jpg", // Hardcoded for now
   });
 
+  // Generate token
+  const token = generateToken(serviceProvider._id);
+
   res.status(201).json({
     success: true,
     message: "Service provider registered successfully",
-    serviceProvider,
+    token,
+    serviceProvider: {
+      id: serviceProvider._id,
+      name: serviceProvider.name,
+      email: serviceProvider.email,
+      phone: serviceProvider.phone,
+      service_types: serviceProvider.service_types,
+      sub_services: serviceProvider.sub_services,
+      experience: serviceProvider.experience,
+      profile_image: serviceProvider.profile_image,
+    },
+  });
+});
+
+// @desc    Login service provider
+// @route   POST /api/service-providers/login
+// @access  Public
+export const loginServiceProvider = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // Find service provider
+  const serviceProvider = await ServiceProvider.findOne({ email });
+  if (!serviceProvider) {
+    return next(new ErrorHandler("Invalid email or password", 401));
+  }
+
+  // Check password
+  const isMatch = await bcrypt.compare(password, serviceProvider.password);
+  if (!isMatch) {
+    return next(new ErrorHandler("Invalid email or password", 401));
+  }
+
+  // Generate token
+  const token = generateToken(serviceProvider._id);
+
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    token,
+    serviceProvider: {
+      id: serviceProvider._id,
+      name: serviceProvider.name,
+      email: serviceProvider.email,
+      phone: serviceProvider.phone,
+      service_types: serviceProvider.service_types,
+      sub_services: serviceProvider.sub_services,
+      experience: serviceProvider.experience,
+      profile_image: serviceProvider.profile_image,
+    },
   });
 });
 
@@ -162,5 +227,58 @@ export const deleteServiceProvider = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Service provider deleted successfully",
+  });
+});
+
+// @desc    Forgot Password (Send OTP)
+// @route   POST /api/service-providers/forgot-password
+// @access  Public
+export const forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  const serviceProvider = await ServiceProvider.findOne({ email });
+
+  if (!serviceProvider) {
+    return next(new ErrorHandler("Service provider not found", 404));
+  }
+
+  // Generate OTP
+  const otp = crypto.randomInt(100000, 999999).toString();
+  otpStorage[email] = otp;
+
+  // Send OTP via email
+  await sendEmail(email, "Password Reset OTP", `Your OTP is: ${otp}`);
+
+  res.status(200).json({
+    success: true,
+    message: "OTP sent to email",
+  });
+});
+
+// @desc    Reset Password
+// @route   POST /api/service-providers/reset-password
+// @access  Public
+export const resetPassword = asyncHandler(async (req, res, next) => {
+  const { email, otp, newPassword } = req.body;
+
+  if (!otpStorage[email] || otpStorage[email] !== otp) {
+    return next(new ErrorHandler("Invalid or expired OTP", 400));
+  }
+
+  const serviceProvider = await ServiceProvider.findOne({ email });
+  if (!serviceProvider) {
+    return next(new ErrorHandler("Service provider not found", 404));
+  }
+
+  // Hash new password
+  const salt = await bcrypt.genSalt(10);
+  serviceProvider.password = await bcrypt.hash(newPassword, salt);
+  await serviceProvider.save();
+
+  // Clear OTP
+  delete otpStorage[email];
+
+  res.status(200).json({
+    success: true,
+    message: "Password reset successfully",
   });
 });

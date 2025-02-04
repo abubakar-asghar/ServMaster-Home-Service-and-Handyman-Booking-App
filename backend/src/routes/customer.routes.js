@@ -14,7 +14,7 @@ import {
 const router = Router();
 
 router.post("/register", registerCustomer);
-router.get("/", isAuthenticatedAdmin, getAllCustomers);
+router.get("/all", isAuthenticatedAdmin, getAllCustomers);
 router.get("/:id", isAuthenticatedCustomer, getCustomerById);
 router.put("/:id", isAuthenticatedCustomer, updateCustomer);
 router.delete("/:id", isAuthenticatedAdmin, deleteCustomer);
