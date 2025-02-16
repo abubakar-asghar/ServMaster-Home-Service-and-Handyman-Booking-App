@@ -1,0 +1,36 @@
+Customers Management
+- View All Customers
+- Customer Details
+- Block/Unblock Customer
+Service Providers Management
+- Verify Service Providers
+- View All Service Providers
+- Block/Unblock Providera
+- Assign/Manage Services
+Service Requests
+- All Requests
+- Pending Requests
+- Ongoing Requests
+- Completed Requests
+- Cancelled Requests
+Chat Management
+- View All Chats
+- Reported Chats
+Reviews & Ratings
+- View All Reviews
+- Reported Reviews
+Service Categories & Subservices
+- Manage Service Categories
+- Manage Subservices
+Reports & Complaints
+- View Reports
+- Resolve Complaints
+Settings
+- General Settings
+- Manage Roles & Permissions
+- System Configurations
+- Authentication & Security
+Admin
+- Admin Profile
+- Change Password
+- Logout

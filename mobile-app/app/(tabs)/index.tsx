@@ -15,8 +15,7 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <Text className='text-3xl font-bold'>Testing Native</Text>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <Text className='text-3xl font-bold'>Welcome</Text>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
