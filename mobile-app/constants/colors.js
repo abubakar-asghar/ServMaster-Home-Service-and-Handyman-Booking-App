@@ -1,4 +1,4 @@
-const tintColor = "#003350"; // Primary color
+const tintColor = "#03314d"; // Primary color
 
 export const colors = {
   primary: tintColor,

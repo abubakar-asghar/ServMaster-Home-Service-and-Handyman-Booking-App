@@ -68,7 +68,7 @@ const OnboardingStep = ({ step, title, image, bullets, onNext }) => {
         <CustomButton
           title={step !== 4 ? "Next" : "Start"}
           handlePress={onNext}
-          containerStyles="bg-secondary rounded-xl min-h-[62px] flex flex-row justify-center items-center"
+          containerStyles="bg-primary rounded-xl min-h-[62px] flex flex-row justify-center items-center"
           textStyles="text-white font-psemibold text-lg"
         />
       </View>

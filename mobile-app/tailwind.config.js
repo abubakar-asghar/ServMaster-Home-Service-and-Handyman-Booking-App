@@ -9,11 +9,19 @@ module.exports = {
         primary: "#03314d", // Navy Blue (Main Color)
         secondary: "#ef9c00", // Orange Shade
         background: "#FFFFFF", // White
+        section: {
+          DEFAULT: "#e5eaed", // for light section backgrounds
+          dark: "#d1d5db",     // optional dark version if needed
+        },
         text: "#1F2937", // Black
         muted: {
           DEFAULT: "#6B7280",
           100: "#E1E6E9",
-        }, // Grey for subtle text/icons & 100 for Active TabIcons Bg
+        },
+        success: "#22c55e",
+        error: "#ef4444",
+        info: "#3b82f6",
+        warning: "#facc15",
       },
       fontFamily: {
         pthin: ["Poppins-Thin", "sans-serif"],

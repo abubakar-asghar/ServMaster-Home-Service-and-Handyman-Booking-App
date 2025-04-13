@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { Image, Text, View, Dimensions } from "react-native";
 import { icons } from "../../constants";
 import { colors } from "../../constants/colors";
+import { StatusBar } from "expo-status-bar";
 
 const screenWidth = Dimensions.get("window").width;
 const tabCount = 5;
@@ -21,13 +22,17 @@ const TabIcon = ({ icon, color, name, focused }) => {
       className="items-center justify-center gap-1 py-2"
       style={{ width: TAB_WIDTH }}
     >
-      <View className={`rounded-full items-center justify-center py-2 px-5 ${focused && "bg-muted-100"}`}>
-      <Image
-        source={icon}
-        resizeMode="contain"
-        tintColor={color}
-        className="w-6 h-6 z-10"
-      />
+      <View
+        className={`rounded-full items-center justify-center py-2 px-5 ${
+          focused && "bg-muted-100"
+        }`}
+      >
+        <Image
+          source={icon}
+          resizeMode="contain"
+          tintColor={color}
+          className="w-6 h-6 z-10"
+        />
       </View>
       <Text
         className={`${
@@ -44,7 +49,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
 const CustomerTabsLayout = () => {
   return (
     <>
-      <Tabs 
+      <Tabs
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
@@ -79,6 +84,8 @@ const CustomerTabsLayout = () => {
           />
         ))}
       </Tabs>
+
+      <StatusBar backgroundColor={colors.primary} style="light" />
     </>
   );
 };
