@@ -692,9 +692,6 @@ video {
 .mb-2 {
   margin-bottom: 0.5rem;
 }
-.ml-auto {
-  margin-left: auto;
-}
 .mt-2 {
   margin-top: 0.5rem;
 }
@@ -1856,11 +1853,6 @@ body {
 }
 
 .group[data-side="right"] .group-data-\[side\=right\]\:rotate-180 {
-  --tw-rotate: 180deg;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.group\/collapsible[data-state="open"] .group-data-\[state\=open\]\/collapsible\:rotate-180 {
   --tw-rotate: 180deg;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }

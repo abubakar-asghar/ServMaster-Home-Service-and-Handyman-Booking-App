@@ -35,6 +35,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
 import {
@@ -135,22 +136,33 @@ const AppSidebar = () => {
   return (
     <Sidebar>
       <SidebarContent>
-        {/* <SidebarMenu>
-          <Collapsible defaultOpen className="group/collapsible">
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                Help
-                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                <SidebarMenuButton />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem />
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        </SidebarMenu> */}
+        <SidebarGroup>
+          <SidebarMenu>
+            <Collapsible className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton asChild>
+                    <span>
+                      <Calendar />
+                      <span>{"item"}</span>
+                    </span>
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <a href="#">
+                          <span>{"sub item"}</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
         {items.map((menu) => (
           <SidebarGroup key={menu.title}>
             <SidebarGroupLabel>{menu.title}</SidebarGroupLabel>
