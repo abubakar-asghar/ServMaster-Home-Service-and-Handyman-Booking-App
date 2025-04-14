@@ -87,6 +87,7 @@ const CustomerHomePage = () => {
                   source={icons.notification}
                   className="w-5 h-5"
                   resizeMode="contain"
+                  tintColor={colors.primary}
                 />
               </TouchableOpacity>
               <Image

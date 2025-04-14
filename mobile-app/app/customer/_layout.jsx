@@ -30,7 +30,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
         <Image
           source={icon}
           resizeMode="contain"
-          tintColor={color}
+          tintColor={focused? colors.primary : color}
           className="w-6 h-6 z-10"
         />
       </View>
@@ -53,7 +53,7 @@ const CustomerTabsLayout = () => {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarActiveTintColor: " black",
+          tabBarActiveTintColor: "black",
           tabBarInactiveTintColor: colors.mutedForeground,
           tabBarStyle: {
             backgroundColor: colors.background,

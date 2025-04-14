@@ -139,24 +139,6 @@ const ProviderRegister = () => {
           </View>
 
           {/* Social Buttons */}
-          {/* <TouchableOpacity className="flex-row items-center justify-center bg-white border border-gray-300 rounded-lg py-3 mb-4">
-            <Image source={images.google} className="w-5 h-5 mr-2" />
-            <Text className="text-base font-pmedium text-gray-700">
-              Continue with Google
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity className="flex-row items-center justify-center bg-[#1877F2] rounded-lg py-3">
-            <Image
-              source={images.facebook}
-              className="w-5 h-5 mr-2"
-              resizeMode="contain"
-            />
-            <Text className="text-base font-pmedium text-white">
-              Continue with Facebook
-            </Text>
-          </TouchableOpacity> */}
-
           <CustomButton
             title="Continue with Google"
             icon={icons.google}
@@ -165,13 +147,13 @@ const ProviderRegister = () => {
             containerStyles="bg-primary"
           />
 
-          <CustomButton
+          {/* <CustomButton
             title="Continue with Facebook"
             icon={icons.facebook}
             handlePress={() => {}}
             isLoading={false}
             containerStyles="bg-primary mt-7"
-          />
+          /> */}
 
           {/* Login Redirect */}
           <View className="flex-row justify-center mt-6 mb-4">

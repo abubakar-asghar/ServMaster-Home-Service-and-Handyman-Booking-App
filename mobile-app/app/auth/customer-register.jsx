@@ -11,7 +11,7 @@ import { Link, useRouter } from "expo-router";
 import FormField from "../../components/ui/FormField";
 import CustomButton from "../../components/ui/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { images } from "../../constants";
+import { icons, images } from "../../constants";
 import Checkbox from "expo-checkbox";
 
 const CustomerRegister = () => {
@@ -111,11 +111,41 @@ const CustomerRegister = () => {
             containerStyles="bg-primary mt-7"
           />
 
+          {/* Divider */}
+          <View className="flex-row items-center justify-center my-7">
+            <View className="flex-1 h-px bg-gray-300" />
+            <Text className="mx-2 text-muted font-pregular text-sm">
+              Register using social account
+            </Text>
+            <View className="flex-1 h-px bg-gray-300" />
+          </View>
+
+          {/* Social Buttons */}
+
+          <CustomButton
+            title="Continue with Google"
+            icon={icons.google}
+            handlePress={() => {}}
+            isLoading={false}
+            containerStyles="bg-primary"
+          />
+
+          {/* <CustomButton
+            title="Continue with Facebook"
+            icon={icons.facebook}
+            handlePress={() => {}}
+            isLoading={false}
+            containerStyles="bg-primary mt-7"
+          /> */}
+
           <View className="flex-row justify-center mt-4 mb-4">
             <Text className="text-lg text-muted font-pregular">
               Already have an account?{" "}
             </Text>
-            <Link href="/auth/login" className="text-lg font-psemibold text-primary">
+            <Link
+              href="/auth/login"
+              className="text-lg font-psemibold text-primary"
+            >
               Login
             </Link>
           </View>

@@ -4,8 +4,6 @@ import chat from "../assets/icons/chat.png";
 import home from "../assets/icons/home.png";
 import profile from "../assets/icons/profile.png";
 import leftArrow from "../assets/icons/left-arrow.png";
-import dashboard from "../assets/icons/dashboard.png";
-import menu from "../assets/icons/menu.png";
 import search from "../assets/icons/search.png";
 import rightArrow from "../assets/icons/right-arrow.png";
 import logout from "../assets/icons/logout.png";
@@ -39,8 +37,6 @@ export default {
   chat,
   profile,
   leftArrow,
-  menu,
-  dashboard,
   search,
   rightArrow,
   logout,
