@@ -48,7 +48,7 @@ const OnboardingStep = ({ step, title, image, bullets, onNext }) => {
                     source={icons.doubleCheck}
                     className="w-4 h-4 mt-1.5 mr-2"
                     resizeMode="contain"
-                    tintColor={colors.tabIconSelected}
+                    tintColor={colors.primary}
                   />
                   <Text
                     key={index}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "../../components/ui/CustomButton";
@@ -24,10 +24,18 @@ export default function SelectRole() {
   };
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-white px-6">
-      <Text className="text-3xl font-psemibold text-center text-black mb-8">
-        Choose Your Role
-      </Text>
+    <SafeAreaView className="flex-1 items-center bg-white px-6">
+      <View className="flex-row gap-2 mt-16 mb-8">
+        <Text className="text-2xl font-psemibold text-center text-black">
+          I want to
+        </Text>
+        <Text className="text-3xl font-pextrabold text-center text-primary">
+          Sign Up
+        </Text>
+        <Text className="text-2xl font-psemibold text-center text-black">
+          as
+        </Text>
+      </View>
 
       <CustomButton
         title="Customer"

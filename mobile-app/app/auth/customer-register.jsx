@@ -18,9 +18,10 @@ const CustomerRegister = () => {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
-    email: "",
+    // email: "",
     phone: "",
     password: "",
+    confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
   const [agree, setAgree] = useState(false); // For Terms & Privacy
@@ -59,22 +60,28 @@ const CustomerRegister = () => {
           </Text>
 
           <FormField
-            title="Full Name"
+            // title="Full Name"
+            placeholder={"Full Name"}
+            icon={icons.profile}
             value={form.name}
             handleChangeText={(text) => setForm({ ...form, name: text })}
             otherStyles="mt-10"
           />
 
-          <FormField
-            title="Email"
+          {/* <FormField
+            // title="Email"
+            placeholder={"Email"}
+            icon={icons.email}
             value={form.email}
             handleChangeText={(text) => setForm({ ...form, email: text })}
             otherStyles="mt-7"
             keyboardType="email-address"
-          />
+          /> */}
 
           <FormField
-            title="Phone Number"
+            // title="Phone Number"
+            placeholder={"Phone Number"}
+            icon={icons.phoneNumber}
             value={form.phone}
             handleChangeText={(text) => setForm({ ...form, phone: text })}
             otherStyles="mt-7"
@@ -82,9 +89,21 @@ const CustomerRegister = () => {
           />
 
           <FormField
-            title="Password"
+            // title="Password"
+            placeholder={"Password"}
+            icon={icons.password}
             value={form.password}
             handleChangeText={(text) => setForm({ ...form, password: text })}
+            otherStyles="mt-7"
+            secureTextEntry
+          />
+
+          <FormField
+            // title="Password"
+            placeholder={"Confirm Password"}
+            icon={icons.password}
+            value={form.confirmPassword}
+            handleChangeText={(text) => setForm({ ...form, confirmPassword: text })}
             otherStyles="mt-7"
             secureTextEntry
           />

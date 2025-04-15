@@ -3,9 +3,10 @@ import services from "../assets/icons/services.png";
 import chat from "../assets/icons/chat.png";
 import home from "../assets/icons/home.png";
 import profile from "../assets/icons/profile.png";
-import leftArrow from "../assets/icons/left-arrow.png";
 import search from "../assets/icons/search.png";
+import leftArrow from "../assets/icons/left-arrow.png";
 import rightArrow from "../assets/icons/right-arrow.png";
+import downArrow from "../assets/icons/down-arrow.png";
 import logout from "../assets/icons/logout.png";
 import eyeHide from "../assets/icons/eye-hide.png";
 import eye from "../assets/icons/eye.png";
@@ -15,6 +16,10 @@ import facebook from "../assets/icons/facebook.png";
 import notification from "../assets/icons/notification.png";
 import location from "../assets/icons/location.png";
 import aim from "../assets/icons/aim.png";
+import email from "../assets/icons/email.png";
+import phoneNumber from "../assets/icons/phone-number.png";
+import password from "../assets/icons/password.png";
+import genders from "../assets/icons/genders.png";
 // Services Categories :
 import cleaning from "../assets/icons/cleaning.png";
 import plumbing from "../assets/icons/plumbing.png";
@@ -36,9 +41,10 @@ export default {
   services,
   chat,
   profile,
-  leftArrow,
   search,
+  leftArrow,
   rightArrow,
+  downArrow,
   logout,
   eyeHide,
   eye,
@@ -47,6 +53,10 @@ export default {
   facebook,
   notification,
   aim,
+  email,
+  phoneNumber,
+  password,
+  genders,
   location,
   cleaning,
   plumbing,

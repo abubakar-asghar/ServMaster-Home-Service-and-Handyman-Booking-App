@@ -15,8 +15,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({
+    // email: "",
+    phone: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
@@ -47,19 +50,33 @@ const LoginScreen = () => {
             Welcome Back
           </Text>
 
-          <FormField
-            title="Email"
-            value={email}
-            handleChangeText={setEmail}
-            otherStyles={"mt-10"}
+          {/* <FormField
+            // title="Email"
+            placeholder={"Email"}
+            icon={icons.email}
+            value={form.email}
+            handleChangeText={(text) => setForm({ ...form, email: text })}
+            otherStyles="mt-7"
             keyboardType="email-address"
+          /> */}
+
+          <FormField
+            // title="Phone Number"
+            placeholder={"Phone Number"}
+            icon={icons.phoneNumber}
+            value={form.phone}
+            handleChangeText={(text) => setForm({ ...form, phone: text })}
+            otherStyles="mt-7"
+            keyboardType="phone-pad"
           />
 
           <FormField
-            title="Password"
-            value={password}
-            handleChangeText={setPassword}
-            otherStyles={"mt-7"}
+            // title="Password"
+            placeholder={"Password"}
+            icon={icons.password}
+            value={form.password}
+            handleChangeText={(text) => setForm({ ...form, password: text })}
+            otherStyles="mt-7"
             secureTextEntry
           />
 
@@ -79,8 +96,8 @@ const LoginScreen = () => {
             containerStyles="bg-primary mt-7"
           />
 
-           {/* Divider */}
-           <View className="flex-row items-center justify-center my-7">
+          {/* Divider */}
+          <View className="flex-row items-center justify-center my-7">
             <View className="flex-1 h-px bg-gray-300" />
             <Text className="mx-2 text-muted font-pregular text-sm">
               Register using social account
@@ -110,7 +127,10 @@ const LoginScreen = () => {
             <Text className="text-lg text-muted font-pregular">
               Don't have an account?{" "}
             </Text>
-            <Link href="/auth/select-role" className="text-lg font-psemibold text-primary">
+            <Link
+              href="/auth/select-role"
+              className="text-lg font-psemibold text-primary"
+            >
               Register
             </Link>
           </View>
