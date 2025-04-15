@@ -1,5 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 import Customer from "../models/customer.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
@@ -158,13 +161,6 @@ export const deleteCustomer = asyncHandler(async (req, res, next) => {
     message: "Customer deleted successfully",
   });
 });
-
-import crypto from "crypto";
-import nodemailer from "nodemailer";
-import bcrypt from "bcryptjs";
-import asyncHandler from "../middlewares/catchAsyncError.js";
-import Customer from "../models/customer.model.js";
-import ErrorHandler from "../utils/errorHandler.js";
 
 // Temporary storage for OTPs (In production, use a database or Redis)
 const otpStorage = {};
