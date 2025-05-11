@@ -1,139 +1,347 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import ServiceProvider from "../models/serviceProvider.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
+import bcrypt from "bcryptjs";
+import { generateToken } from "../services/generateJWTToken.js";
 
-
-// Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
-};
-
-// @desc    Register a new service provider
-// @route   POST /api/service-providers/register
-// @access  Public
+/**
+ * @desc    Register a new service provider
+ * @route   POST /api/service-providers/register
+ * @access  Public
+ */
 export const registerServiceProvider = asyncHandler(async (req, res, next) => {
-  const {
-    name,
-    email,
-    phone,
-    password,
-    service_types,
-    sub_services,
-    experience,
-    certifications,
-    cnic_number,
-    cnic_images,
-    selfie_image,
-    previous_work_images,
-  } = req.body;
+  const { fullName, phone, gender, password, confirmPassword } = req.body;
 
-  // Check if provider exists
-  const existingProvider = await ServiceProvider.findOne({ email });
-  if (existingProvider) {
-    return next(new ErrorHandler("Service provider already exists", 400));
+  if (password !== confirmPassword) {
+    return next(new ErrorHandler(400, "Passwords do not match"));
   }
 
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  const existing = await ServiceProvider.findOne({ phone });
+  if (existing) {
+    return next(new ErrorHandler(400, "Phone number already exists"));
+  }
 
-  // Create new service provider
-  const serviceProvider = await ServiceProvider.create({
-    name,
-    email,
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const provider = await ServiceProvider.create({
+    fullName,
     phone,
     password: hashedPassword,
-    service_types,
-    sub_services,
-    experience,
-    certifications,
-    cnic_number,
-    cnic_images,
-    selfie_image,
-    previous_work_images,
-    profile_image: "https://example.com/default-profile.jpg", // Hardcoded for now
+    gender,
   });
 
   // Generate token
-  const token = generateToken(serviceProvider._id);
+  const token = generateToken(provider._id, "service-provider");
 
   res.status(201).json({
     success: true,
-    message: "Service provider registered successfully",
+    message: "Provider registered successfully",
+    data: provider,
     token,
-    serviceProvider: {
-      id: serviceProvider._id,
-      name: serviceProvider.name,
-      email: serviceProvider.email,
-      phone: serviceProvider.phone,
-      service_types: serviceProvider.service_types,
-      sub_services: serviceProvider.sub_services,
-      experience: serviceProvider.experience,
-      profile_image: serviceProvider.profile_image,
-    },
+    role: "service-provider",
   });
 });
 
-// @desc    Login service provider
-// @route   POST /api/service-providers/login
-// @access  Public
-export const loginServiceProvider = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+/**
+ * @desc    Get logged-in provider profile
+ * @route   GET /api/service-providers/profile
+ * @access  Private
+ */
+export const getServiceProviderProfile = asyncHandler(
+  async (req, res, next) => {
+    const provider = await ServiceProvider.findById(req.user._id);
+    if (!provider) return next(new ErrorHandler(404, "Provider not found"));
+    res.status(200).json({
+      success: true,
+      message: "Provider profile fetched successfully",
+      data: provider,
+    });
+  }
+);
 
-  // Find service provider
-  const serviceProvider = await ServiceProvider.findOne({ email });
-  if (!serviceProvider) {
-    return next(new ErrorHandler("Invalid email or password", 401));
+/**
+ * @desc    Get service providers by service ID
+ * @route   PUT /api/service-providers/:serviceId
+ * @access  Public
+ */
+export const getServiceProvidersByService = asyncHandler(
+  async (req, res, next) => {
+    const { serviceId } = req.params;
+    const providers = await ServiceProvider.find({
+      "services.serviceId": serviceId,
+    }).populate("services.serviceId services.services");
+
+    if (!providers || providers.length === 0) {
+      return next(new ErrorHandler(404, "No providers found for this service"));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Providers fetched successfully",
+      data: providers,
+    });
+  }
+);
+
+/**
+ * @desc    Update personal info
+ * @route   PUT /api/service-providers/personal-info
+ * @access  Private
+ */
+export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
+  const { fullName, whatsapp, email, gender } = req.body;
+
+  const updatedInfo = {};
+
+  if (fullName !== undefined) {
+    updatedInfo.fullName = fullName;
   }
 
-  // Check password
-  const isMatch = await bcrypt.compare(password, serviceProvider.password);
-  if (!isMatch) {
-    return next(new ErrorHandler("Invalid email or password", 401));
+  if (whatsapp !== undefined || email !== undefined || gender !== undefined) {
+    updatedInfo.personalInfo = {};
+
+    if (whatsapp !== undefined) {
+      updatedInfo.personalInfo.whatsapp = whatsapp;
+    }
+    if (email !== undefined) {
+      updatedInfo.personalInfo.email = email;
+    }
+    if (gender !== undefined) {
+      updatedInfo.personalInfo.gender = gender;
+    }
   }
 
-  // Generate token
-  const token = generateToken(serviceProvider._id);
-
-  res.status(200).json({
-    success: true,
-    message: "Login successful",
-    token,
-    serviceProvider: {
-      id: serviceProvider._id,
-      name: serviceProvider.name,
-      email: serviceProvider.email,
-      phone: serviceProvider.phone,
-      service_types: serviceProvider.service_types,
-      sub_services: serviceProvider.sub_services,
-      experience: serviceProvider.experience,
-      profile_image: serviceProvider.profile_image,
-    },
-  });
-});
-
-// @desc    Get all service providers
-// @route   GET /api/service-providers
-// @access  Private (Admin only)
-export const getAllServiceProviders = asyncHandler(async (req, res, next) => {
-  const serviceProviders = await ServiceProvider.find().populate(
-    "service_types sub_services"
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    { $set: updatedInfo },
+    { new: true }
   );
 
   res.status(200).json({
     success: true,
-    count: serviceProviders.length,
-    serviceProviders,
+    message: "Personal information updated successfully",
+    data: provider,
   });
 });
 
-// @desc    Get single service provider by ID
-// @route   GET /api/service-providers/:id
-// @access  Private (Admin or Self)
+/**
+ * @desc    Update business info
+ * @route   PUT /api/service-providers/business-info
+ * @access  Private
+ */
+export const updateBusinessInfo = asyncHandler(async (req, res, next) => {
+  const {
+    profileImage,
+    type,
+    name,
+    description,
+    address,
+    city,
+    hasPhysicalShop,
+    workingDays,
+    workingHours,
+  } = req.body;
+
+  const updateFields = {};
+
+  if (profileImage !== undefined)
+    updateFields["businessInfo.profileImage"] = profileImage;
+  if (type !== undefined) updateFields["businessInfo.type"] = type;
+  if (name !== undefined) updateFields["businessInfo.name"] = name;
+  if (description !== undefined)
+    updateFields["businessInfo.description"] = description;
+  if (address !== undefined) updateFields["businessInfo.address"] = address;
+  if (city !== undefined) updateFields["businessInfo.city"] = city;
+  if (hasPhysicalShop !== undefined)
+    updateFields["businessInfo.hasPhysicalShop"] = hasPhysicalShop;
+  if (workingDays !== undefined)
+    updateFields["businessInfo.workingDays"] = workingDays;
+  if (workingHours !== undefined)
+    updateFields["businessInfo.workingHours"] = workingHours;
+
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    { $set: updateFields },
+    { new: true }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Business information updated successfully",
+    data: provider,
+  });
+});
+
+/**
+ * @desc    Update password
+ * @route   PUT /api/service-providers/update-password
+ * @access  Private
+ */
+export const updatePassword = asyncHandler(async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const provider = await ServiceProvider.findById(req.user._id);
+  if (!provider) return next(new ErrorHandler(404, "Provider not found"));
+
+  const isMatch = await bcrypt.compare(oldPassword, provider.password);
+  if (!isMatch) return next(new ErrorHandler(400, "Old password is incorrect"));
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  provider.password = hashedPassword;
+  await provider.save();
+
+  res
+    .status(200)
+    .json({ success: true, message: "Password updated successfully" });
+});
+
+/**
+ * @desc    Update professional verification
+ * @route   PUT /api/service-providers/phone-verification
+ * @access  Private
+ */
+export const updatePhoneVerification = asyncHandler(async (req, res, next) => {
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    { "verification.phone": req.body },
+    { new: true }
+  );
+  res.status(200).json({
+    success: true,
+    message: "Professional verification done successfully",
+    data: provider,
+  });
+});
+
+/**
+ * @desc    Update professional verification
+ * @route   PUT /api/service-providers/verification/professional-verification
+ * @access  Private
+ */
+export const updateProfessionalVerification = asyncHandler(
+  async (req, res, next) => {
+    const provider = await ServiceProvider.findByIdAndUpdate(
+      req.user._id,
+      { "verification.professional": req.body },
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: "Professional verification done successfully",
+      data: provider,
+    });
+  }
+);
+
+/**
+ * @desc    Update CNIC/identity info
+ * @route   PUT /api/service-providers/identity-verification
+ * @access  Private
+ */
+export const updateIdentityVerification = asyncHandler(
+  async (req, res, next) => {
+    const { cnicNumber } = req.body;
+    const existing = await ServiceProvider.findOne({
+      "verification.identity.cnicNumber": cnicNumber,
+      _id: { $ne: req.user._id },
+    });
+    if (existing) return next(new ErrorHandler(400, "CNIC already exists"));
+
+    const provider = await ServiceProvider.findByIdAndUpdate(
+      req.user._id,
+      {
+        "verification.identity": {
+          ...req.body,
+          status: "not_verified",
+          updatedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+    res.json(provider);
+  }
+);
+
+/**
+ * @desc    Upload CNIC front/back images
+ * @route   PUT /api/service-providers/verification/cnic-images
+ * @access  Private
+ */
+export const uploadCNICImages = asyncHandler(async (req, res, next) => {
+  const { cnicFront, cnicBack } = req.files;
+
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    {
+      "verification.identity.cnicFront": cnicFront?.[0]?.path,
+      "verification.identity.cnicBack": cnicBack?.[0]?.path,
+    },
+    { new: true }
+  );
+  res.json(provider);
+});
+
+/**
+ * @desc    Upload selfie image
+ * @route   PUT /api/service-providers/verification/selfie
+ * @access  Private
+ */
+export const uploadSelfie = asyncHandler(async (req, res, next) => {
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    { "verification.identity.selfieImage": req.file.path },
+    { new: true }
+  );
+  res.json(provider);
+});
+
+/**
+ * @desc    Upload work portfolio images
+ * @route   PUT /api/service-providers/portfolio
+ * @access  Private
+ */
+export const uploadWorkImages = asyncHandler(async (req, res, next) => {
+  const imagePaths = req.files.map((file) => file.path);
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    { $push: { "portfolio.images": { $each: imagePaths } } },
+    { new: true }
+  );
+  res.json(provider);
+});
+
+/**
+ * @desc    Add services and sub-services
+ * @route   PUT /api/service-providers/services
+ * @access  Private
+ */
+export const addServices = asyncHandler(async (req, res, next) => {
+  const { services } = req.body;
+
+  const provider = await ServiceProvider.findByIdAndUpdate(
+    req.user._id,
+    { services },
+    { new: true }
+  );
+  res.json(provider);
+});
+
+/**
+ * @desc    Admin: Get all service providers
+ * @route   GET /api/service-providers
+ * @access  Admin
+ */
+export const getAllServiceProviders = asyncHandler(async (req, res, next) => {
+  const providers = await ServiceProvider.find().populate(
+    "services.categoryId services.services"
+  );
+  res.json(providers);
+});
+
+/**
+ * @descGet single service provider by ID
+ * @route GET /api/service-providers/:id
+ * @accessPrivate (Admin or Self)
+ */
 export const getServiceProviderById = asyncHandler(async (req, res, next) => {
   const serviceProvider = await ServiceProvider.findById(
     req.params.id
@@ -149,51 +357,11 @@ export const getServiceProviderById = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Update service provider details
-// @route   PUT /api/service-providers/:id
-// @access  Private (Only service provider)
-export const updateServiceProvider = asyncHandler(async (req, res, next) => {
-  const {
-    name,
-    phone,
-    service_types,
-    sub_services,
-    experience,
-    certifications,
-    previous_work_images,
-    profile_image,
-  } = req.body;
-
-  const serviceProvider = await ServiceProvider.findById(req.params.id);
-  if (!serviceProvider) {
-    return next(new ErrorHandler("Service provider not found", 404));
-  }
-
-  serviceProvider.name = name || serviceProvider.name;
-  serviceProvider.phone = phone || serviceProvider.phone;
-  serviceProvider.service_types =
-    service_types || serviceProvider.service_types;
-  serviceProvider.sub_services = sub_services || serviceProvider.sub_services;
-  serviceProvider.experience = experience || serviceProvider.experience;
-  serviceProvider.certifications =
-    certifications || serviceProvider.certifications;
-  serviceProvider.previous_work_images =
-    previous_work_images || serviceProvider.previous_work_images;
-  serviceProvider.profile_image =
-    profile_image || serviceProvider.profile_image;
-
-  await serviceProvider.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Service provider updated successfully",
-    serviceProvider,
-  });
-});
-
-// @desc    Approve service provider (Admin Only)
-// @route   PUT /api/service-providers/:id/approve
-// @access  Private (Admin only)
+/**
+ * @descApprove service provider (Admin Only)
+ * @route PUT /api/service-providers/:id/approve
+ * @accessPrivate (Admin only)
+ */
 export const approveServiceProvider = asyncHandler(async (req, res, next) => {
   const serviceProvider = await ServiceProvider.findById(req.params.id);
   if (!serviceProvider) {
@@ -212,9 +380,11 @@ export const approveServiceProvider = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Delete service provider
-// @route   DELETE /api/service-providers/:id
-// @access  Private (Admin only)
+/**
+ * @descDelete service provider
+ * @route DELETE /api/service-providers/:id
+ * @accessPrivate (Admin only)
+ */
 export const deleteServiceProvider = asyncHandler(async (req, res, next) => {
   const serviceProvider = await ServiceProvider.findById(req.params.id);
 
@@ -230,9 +400,11 @@ export const deleteServiceProvider = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Forgot Password (Send OTP)
-// @route   POST /api/service-providers/forgot-password
-// @access  Public
+/**
+ * @descForgot Password (Send OTP)
+ * @route POST /api/service-providers/forgot-password
+ * @accessPublic
+ */
 export const forgotPassword = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
   const serviceProvider = await ServiceProvider.findOne({ email });
@@ -254,9 +426,11 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Reset Password
-// @route   POST /api/service-providers/reset-password
-// @access  Public
+/**
+ * @descReset Password
+ * @route POST /api/service-providers/reset-password
+ * @accessPublic
+ */
 export const resetPassword = asyncHandler(async (req, res, next) => {
   const { email, otp, newPassword } = req.body;
 

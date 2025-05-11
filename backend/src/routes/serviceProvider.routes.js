@@ -1,35 +1,56 @@
+// routes/serviceProvider.routes.js
+
 import { Router } from "express";
 import {
   registerServiceProvider,
+  updatePersonalInfo,
+  updateBusinessInfo,
+  updatePassword,
+  uploadWorkImages,
+  getServiceProviderProfile,
+  uploadCNICImages,
+  uploadSelfie,
+  addServices,
   getAllServiceProviders,
-  getServiceProviderById,
-  updateServiceProvider,
-  approveServiceProvider,
-  deleteServiceProvider,
+  updatePhoneVerification,
+  updateIdentityVerification,
+  updateProfessionalVerification,
 } from "../controllers/serviceProvider.controllers.js";
-import {
-  isAuthenticatedAdmin,
-  isAuthenticatedServiceProvider,
-} from "../middlewares/authMiddleware.js";
+
+// import { authenticateUser } from "../middlewares/authMiddleware.js";
+import upload from "../middlewares/multerMiddleware.js";
 
 const router = Router();
 
-// Register a new service provider
+// Public Route
 router.post("/register", registerServiceProvider);
+router.get("/:serviceId", getServiceProviderProfile);
 
-// Get all service providers (Admin only)
-router.get("/", isAuthenticatedAdmin, getAllServiceProviders);
+// Protected Routes
+// router.use(authenticateUser);
 
-// Get a single service provider by ID (Admin or Self)
-router.get("/:id", isAuthenticatedServiceProvider, getServiceProviderById);
+router.get("/me", getServiceProviderProfile);
+router.put("/personal-info", updatePersonalInfo);
+router.put("/business-info", updateBusinessInfo);
+router.put("/change-password", updatePassword);
+router.put("/phone-verification", updatePhoneVerification);
+router.put("/identity-verification", updateIdentityVerification);
+router.put("/professional-verification", updateProfessionalVerification);
 
-// Update service provider details (Only provider)
-router.put("/:id", isAuthenticatedServiceProvider, updateServiceProvider);
+router.post("/upload/work-images", upload.array("images", 5), uploadWorkImages);
+router.post(
+  "/upload/cnic",
+  upload.fields([
+    { name: "cnicFront", maxCount: 1 },
+    { name: "cnicBack", maxCount: 1 },
+  ]),
+  uploadCNICImages
+);
+router.post("/upload/selfie", upload.single("selfie"), uploadSelfie);
 
-// Approve service provider (Admin only)
-router.put("/:id/approve", isAuthenticatedAdmin, approveServiceProvider);
+router.put("/services", addServices);
 
-// Delete service provider (Admin only)
-router.delete("/:id", isAuthenticatedAdmin, deleteServiceProvider);
+// Admin/Management Route
+router.get("/all", getAllServiceProviders);
 
 export default router;

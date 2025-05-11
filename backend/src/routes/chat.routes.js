@@ -1,17 +1,18 @@
 import { Router } from "express";
 import {
-  createOrGetChat,
-  getChats,
+  createOrFetchChat,
+  getChatMessages,
   sendMessage,
-  getMessages,
-  deleteChat,
+  getAllChats,
+  deleteChatAndMessages,
 } from "../controllers/chat.controllers.js";
+import { isAuthenticatedUser } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
 router.route("/message").post(sendMessage);
-router.route("/messages/:chatId").get(getMessages);
-router.route("/").post(createOrGetChat).get(getChats);
-router.route("/:chatId").delete(deleteChat);
+router.route("/messages/:chatId").get(getChatMessages);
+router.route("/").post(createOrFetchChat).get(isAuthenticatedUser, getAllChats);
+router.route("/:chatId").delete(deleteChatAndMessages);
 
 export default router;

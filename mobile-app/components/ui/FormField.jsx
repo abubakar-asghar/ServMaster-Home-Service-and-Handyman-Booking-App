@@ -10,6 +10,7 @@ const FormField = ({
   icon,
   handleChangeText,
   otherStyles,
+  style,
   secureTextEntry,
   ...props
 }) => {
@@ -21,9 +22,12 @@ const FormField = ({
         <Text className="text-base text-text font-pmedium">{title}</Text>
       )}
 
-      <View className="w-full h-16 px-5 bg-black-100 rounded-2xl border-2 border-gray-300 focus:border-primary flex flex-row items-center">
-        {icon && (
-          <View className="flex-row items-center gap-4 mr-3">
+      <View
+        className="w-full h-16 px-5 bg-black-100 rounded-2xl border-2 border-gray-300 focus:border-primary flex flex-row items-center"
+        style={style}
+      >
+        {/* {icon && (
+          <View className="flex-row items-center gap-4 mr-5">
             <Image
               source={icon}
               className="w-5 h-5"
@@ -32,20 +36,20 @@ const FormField = ({
             />
             <View className="w-[1px] h-10 bg-gray-300" />
           </View>
-        )}
+        )} */}
 
         <TextInput
-          className="flex-1 text-text font-psemibold text-base"
+          className="flex-1 text-text font-pmedium text-base"
           style={{ includeFontPadding: false }}
           value={value}
           placeholder={placeholder}
-          placeholderTextColor={icon && colors.text}
+          placeholderTextColor={icon && colors.muted}
           onChangeText={handleChangeText}
           secureTextEntry={secureTextEntry && !showPassword}
           {...props}
         />
 
-        {secureTextEntry && (
+        {secureTextEntry ? (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Image
               source={!showPassword ? icons.eye : icons.eyeHide}
@@ -53,7 +57,16 @@ const FormField = ({
               resizeMode="contain"
             />
           </TouchableOpacity>
-        )}
+        ) : icon ? (
+          <View className="items-center ml-5">
+            <Image
+              source={icon}
+              className="w-5 h-5"
+              resizeMode="contain"
+              tintColor={colors.primary}
+            />
+          </View>
+        ) : null}
       </View>
     </View>
   );

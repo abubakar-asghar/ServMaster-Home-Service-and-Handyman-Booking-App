@@ -14,28 +14,72 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../constants";
 import Checkbox from "expo-checkbox";
 
+const ErrorText = ({ error }) => {
+  return (
+    <Text className="text-red-500 font-pregular text-sm mt-1 ml-2">
+      {error}
+    </Text>
+  );
+};
+
 const CustomerRegister = () => {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
-    // email: "",
     phone: "",
     password: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [agree, setAgree] = useState(false); // For Terms & Privacy
 
-  const handleRegister = () => {
-    if (!agree) {
-      alert("Please agree to Terms and Privacy Policy first.");
-      return;
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [agree, setAgree] = useState(false);
+
+  // Validation
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.name.trim()) {
+      newErrors.name = "Full name is required.";
     }
+
+    if (!form.phone) {
+      newErrors.phone = "Phone number is required.";
+    } else if (!/^\d{11}$/.test(form.phone)) {
+      newErrors.phone = "Phone number must be exactly 11 digits.";
+    } else if (!/^03\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Phone number must start with 03.";
+    }
+
+    if (!form.password) {
+      newErrors.password = "Password is required.";
+    } else if (form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password.";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
+
+    if (!agree) {
+      newErrors.agree = "You must agree to the Terms & Privacy Policy.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle Customer Registration
+  const handleRegister = () => {
+    if (!validateForm()) return;
 
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      router.push("/(tabs)/home");
+      router.push("/customer/home");
     }, 2000);
   };
 
@@ -60,26 +104,15 @@ const CustomerRegister = () => {
           </Text>
 
           <FormField
-            // title="Full Name"
             placeholder={"Full Name"}
             icon={icons.profile}
             value={form.name}
             handleChangeText={(text) => setForm({ ...form, name: text })}
             otherStyles="mt-10"
           />
-
-          {/* <FormField
-            // title="Email"
-            placeholder={"Email"}
-            icon={icons.email}
-            value={form.email}
-            handleChangeText={(text) => setForm({ ...form, email: text })}
-            otherStyles="mt-7"
-            keyboardType="email-address"
-          /> */}
+          {errors.name && <ErrorText error={errors.name} />}
 
           <FormField
-            // title="Phone Number"
             placeholder={"Phone Number"}
             icon={icons.phoneNumber}
             value={form.phone}
@@ -87,9 +120,9 @@ const CustomerRegister = () => {
             otherStyles="mt-7"
             keyboardType="phone-pad"
           />
+          {errors.phone && <ErrorText error={errors.phone} />}
 
           <FormField
-            // title="Password"
             placeholder={"Password"}
             icon={icons.password}
             value={form.password}
@@ -97,16 +130,21 @@ const CustomerRegister = () => {
             otherStyles="mt-7"
             secureTextEntry
           />
+          {errors.password && <ErrorText error={errors.password} />}
 
           <FormField
-            // title="Password"
             placeholder={"Confirm Password"}
             icon={icons.password}
             value={form.confirmPassword}
-            handleChangeText={(text) => setForm({ ...form, confirmPassword: text })}
+            handleChangeText={(text) =>
+              setForm({ ...form, confirmPassword: text })
+            }
             otherStyles="mt-7"
             secureTextEntry
           />
+          {errors.confirmPassword && (
+            <ErrorText error={errors.confirmPassword} />
+          )}
 
           {/* Terms and Conditions */}
           <View className="flex-row w-full px-2 items-center mt-7">
@@ -122,6 +160,7 @@ const CustomerRegister = () => {
               <Text className="text-primary underline">Privacy Policy</Text>
             </Text>
           </View>
+          {errors.agree && <ErrorText error={errors.agree} />}
 
           <CustomButton
             title="Register"

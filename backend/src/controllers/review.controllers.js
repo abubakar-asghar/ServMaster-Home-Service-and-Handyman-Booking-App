@@ -5,15 +5,22 @@ import ServiceProvider from "../models/serviceProvider.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 
-// @desc   Create a new review
-// @route  POST /api/reviews
-// @access Private (Customer only)
+/**
+ * @desc   Create a new review
+ * @route  POST /api/reviews
+ * @access Private (Customer only)
+ */
 export const createReview = asyncHandler(async (req, res, next) => {
   const { service_request_id, service_provider_id, rating, review } = req.body;
   const customer_id = req.customer.id; // Assuming authentication middleware sets req.customer
 
   if (!service_request_id || !service_provider_id || !rating) {
-    return next(new ErrorHandler("Service request ID, provider ID, and rating are required", 400));
+    return next(
+      new ErrorHandler(
+        "Service request ID, provider ID, and rating are required",
+        400
+      )
+    );
   }
 
   // Check if the service request exists
@@ -35,9 +42,14 @@ export const createReview = asyncHandler(async (req, res, next) => {
   }
 
   // Prevent duplicate reviews for the same service request
-  const existingReview = await Review.findOne({ service_request_id, customer_id });
+  const existingReview = await Review.findOne({
+    service_request_id,
+    customer_id,
+  });
   if (existingReview) {
-    return next(new ErrorHandler("You have already reviewed this service", 400));
+    return next(
+      new ErrorHandler("You have already reviewed this service", 400)
+    );
   }
 
   const newReview = await Review.create({
@@ -55,30 +67,42 @@ export const createReview = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc   Get all reviews
-// @route  GET /api/reviews
-// @access Public
-export const getServiceProviderReviews = asyncHandler(async (req, res, next) => {
-  const { service_provider_id } = req.params;
+/**
+ * @desc   Get all reviews
+ * @route  GET /api/reviews
+ * @access Public
+ */
+export const getServiceProviderReviews = asyncHandler(
+  async (req, res, next) => {
+    const { service_provider_id } = req.params;
 
-  const serviceProvider = await ServiceProvider.findById(service_provider_id);
-  if (!serviceProvider) {
-    return next(new ErrorHandler("Service provider not found", 404));
+    const serviceProvider = await ServiceProvider.findById(service_provider_id);
+    if (!serviceProvider) {
+      return next(new ErrorHandler("Service provider not found", 404));
+    }
+
+    const reviews = await Review.find({ service_provider_id }).populate(
+      "customer_id",
+      "name"
+    );
+
+    res.status(200).json({
+      success: true,
+      reviews,
+    });
   }
+);
 
-  const reviews = await Review.find({ service_provider_id }).populate("customer_id", "name");
-
-  res.status(200).json({
-    success: true,
-    reviews,
-  });
-});
-
-// @desc   Get a single review by ID
-// @route  GET /api/reviews/:id
-// @access Public
+/**
+ * @desc   Get a single review by ID
+ * @route  GET /api/reviews/:id
+ * @access Public
+ */
 export const getReviewById = asyncHandler(async (req, res, next) => {
-  const review = await Review.findById(req.params.id).populate("customer_id", "name");
+  const review = await Review.findById(req.params.id).populate(
+    "customer_id",
+    "name"
+  );
 
   if (!review) {
     return next(new ErrorHandler("Review not found", 404));
@@ -90,9 +114,11 @@ export const getReviewById = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Update a review (Only the customer who created it can update)
-// @route   PUT /api/reviews/:id
-// @access  Private (Customer only)
+/**
+ * @desc    Update a review (Only the customer who created it can update)
+ * @route   PUT /api/reviews/:id
+ * @access  Private (Customer only)
+ */
 export const updateReview = asyncHandler(async (req, res, next) => {
   const { rating, review } = req.body;
   const customer_id = req.customer.id; // Assuming authentication middleware sets req.customer
@@ -119,9 +145,11 @@ export const updateReview = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Delete a review (Only the customer who created it can delete)
-// @route   DELETE /api/reviews/:id
-// @access  Private (Customer only)
+/**
+ * @desc    Delete a review (Only the customer who created it can delete)
+ * @route   DELETE /api/reviews/:id
+ * @access  Private (Customer only)
+ */
 export const deleteReview = asyncHandler(async (req, res, next) => {
   const customer_id = req.customer.id; // Assuming authentication middleware sets req.customer
 

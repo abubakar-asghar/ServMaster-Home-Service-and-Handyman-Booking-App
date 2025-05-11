@@ -6,43 +6,104 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  Alert,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import Checkbox from "expo-checkbox";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useRegisterProvider } from "../../hooks/useProvider";
 import FormField from "../../components/ui/FormField";
 import CustomButton from "../../components/ui/CustomButton";
 import { icons, images } from "../../constants";
 import { colors } from "../../constants/colors";
+import Dropdown from "../../components/ui/Dropdown";
+
+const ErrorText = ({ error }) => {
+  return (
+    <Text className="text-red-500 font-pregular text-sm mt-1 ml-2">
+      {error}
+    </Text>
+  );
+};
 
 const ProviderRegister = () => {
   const router = useRouter();
+
+  const [errors, setErrors] = useState({});
+  const [gender, setGender] = useState(null);
+  // const [providerType, setProviderType] = useState(null);
+  const [agree, setAgree] = useState(false);
+
   const [form, setForm] = useState({
-    name: "",
-    email: "",
+    fullName: "",
     phone: "",
-    skills: "",
-    experience: "",
     password: "",
     confirmPassword: "",
   });
-  const [gender, setGender] = useState("");
-  const [genderModalVisible, setGenderModalVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [agree, setAgree] = useState(false); // For Terms & Privacy
 
-  const handleRegister = () => {
+  const { mutateAsync: registerProvider, isPending } = useRegisterProvider();
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.fullName.trim()) {
+      newErrors.fullName = "Full name is required.";
+    }
+
+    if (!form.phone) {
+      newErrors.phone = "Phone number is required.";
+    } else if (!/^\d{11}$/.test(form.phone)) {
+      newErrors.phone = "Phone number must be exactly 11 digits.";
+    } else if (!/^03\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Phone number must start with 03.";
+    }
+
+    if (!form.password) {
+      newErrors.password = "Password is required.";
+    } else if (form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password.";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+    }
+
     if (!agree) {
-      alert("Please agree to Terms and Privacy Policy first.");
+      newErrors.agree = "You must agree to the Terms & Privacy Policy.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+
+    if (form.password !== form.confirmPassword) {
+      Alert.alert("Passwords do not match.");
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/(tabs)/home");
-    }, 2000);
+    try {
+      const response = await registerProvider({
+        ...form,
+        gender: !gender ? "not_specified" : gender,
+        // providerType,
+      });
+
+      if (response.success) {
+        router.push("/auth/login");
+      } else {
+        console.log(
+          response.message || "Registration failed. Please try again."
+        );
+      }
+    } catch (error) {
+      console.log("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -66,26 +127,15 @@ const ProviderRegister = () => {
           </Text>
 
           <FormField
-            // title="Full Name"
             placeholder={"Full Name"}
             icon={icons.profile}
-            value={form.name}
-            handleChangeText={(text) => setForm({ ...form, name: text })}
+            value={form.fullName}
+            handleChangeText={(text) => setForm({ ...form, fullName: text })}
             otherStyles="mt-10"
           />
-
-          {/* <FormField
-            // title="Email"
-            placeholder={"Email"}
-            icon={icons.email}
-            value={form.email}
-            handleChangeText={(text) => setForm({ ...form, email: text })}
-            otherStyles="mt-7"
-            keyboardType="email-address"
-          /> */}
+          {errors.fullName && <ErrorText error={errors.fullName} />}
 
           <FormField
-            // title="Phone Number"
             placeholder={"Phone Number"}
             icon={icons.phoneNumber}
             value={form.phone}
@@ -93,9 +143,9 @@ const ProviderRegister = () => {
             otherStyles="mt-7"
             keyboardType="phone-pad"
           />
+          {errors.phone && <ErrorText error={errors.phone} />}
 
           <FormField
-            // title="Password"
             placeholder={"Password"}
             icon={icons.password}
             value={form.password}
@@ -103,9 +153,9 @@ const ProviderRegister = () => {
             otherStyles="mt-7"
             secureTextEntry
           />
+          {errors.password && <ErrorText error={errors.password} />}
 
           <FormField
-            // title="Password"
             placeholder={"Confirm Password"}
             icon={icons.password}
             value={form.confirmPassword}
@@ -115,51 +165,41 @@ const ProviderRegister = () => {
             otherStyles="mt-7"
             secureTextEntry
           />
+          {errors.confirmPassword && (
+            <ErrorText error={errors.confirmPassword} />
+          )}
 
-          {/* <FormField
-            title="Skills"
-            value={form.skills}
-            handleChangeText={(text) => setForm({ ...form, skills: text })}
-            otherStyles="mt-7"
+          {/* Gender Dropdown */}
+          <Dropdown
+            placeholder="Select Gender"
+            defaultValue={gender}
+            data={[
+              { key: "1", value: "Male" },
+              { key: "2", value: "Female" },
+              { key: "3", value: "Not specified" },
+            ]}
+            onChange={setGender}
+            containerStyles="mt-7"
           />
 
-          <FormField
-            title="Experience"
-            value={form.experience}
-            handleChangeText={(text) => setForm({ ...form, experience: text })}
-            otherStyles="mt-7"
+          {/* Account Type Dropdown
+          <Dropdown
+            placeholder="Select Account Type"
+            defaultValue={providerType}
+            data={[
+              { key: "1", value: "individual" },
+              { key: "2", value: "business" },
+            ]}
+            onChange={setProviderType}
+            containerStyles="mt-7"
           /> */}
-
-          <TouchableOpacity
-            onPress={() => setGenderModalVisible(true)}
-            className="mt-7 h-16 px-5 bg-black-100 rounded-2xl border-2 border-gray-300 flex flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center gap-2">
-              <View className="flex-row items-center gap-4 mr-3">
-                <Image
-                  source={icons.genders} // Make sure you have a gender icon in your icons file
-                  className="w-5 h-5"
-                  tintColor={colors.primary}
-                />
-                <View className="w-[1px] h-10 bg-gray-300" />
-              </View>
-              <Text className="text-text font-psemibold text-base">
-                {gender ? gender : "Select Gender"}
-              </Text>
-            </View>
-            <Image
-              source={icons.downArrow} // Or any arrow/dropdown icon
-              className="w-4 h-4"
-              tintColor={colors.muted.DEFAULT}
-            />
-          </TouchableOpacity>
 
           {/* Terms and Conditions */}
           <View className="flex-row w-full px-2 items-center mt-7">
             <Checkbox
               value={agree}
               onValueChange={setAgree}
-              color={agree ? "#007bff" : undefined}
+              color={agree ? colors.primary : undefined}
             />
             <Text className="text-md text-muted font-pregular px-4">
               I agree to the{" "}
@@ -168,11 +208,12 @@ const ProviderRegister = () => {
               <Text className="text-primary underline">Privacy Policy</Text>
             </Text>
           </View>
+          {errors.agree && <ErrorText error={errors.agree} />}
 
           <CustomButton
             title="Register"
             handlePress={handleRegister}
-            isLoading={loading}
+            isLoading={isPending}
             containerStyles="bg-primary mt-7"
           />
 
@@ -194,14 +235,6 @@ const ProviderRegister = () => {
             containerStyles="bg-primary"
           />
 
-          {/* <CustomButton
-            title="Continue with Facebook"
-            icon={icons.facebook}
-            handlePress={() => {}}
-            isLoading={false}
-            containerStyles="bg-primary mt-7"
-          /> */}
-
           {/* Login Redirect */}
           <View className="flex-row justify-center mt-6 mb-4">
             <Text className="text-lg text-muted font-pregular">
@@ -214,40 +247,6 @@ const ProviderRegister = () => {
               Login
             </Link>
           </View>
-
-          {genderModalVisible && (
-            <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center bg-black bg-opacity-40">
-              <View className="w-[80%] bg-white p-6 rounded-xl">
-                <Text className="text-lg font-psemibold text-center mb-4 text-primary">
-                  Select Gender
-                </Text>
-                {["Male", "Female"].map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    onPress={() => {
-                      setGender(item);
-                      setGenderModalVisible(false);
-                    }}
-                    className="p-3 border border-gray-300 rounded-lg mb-3"
-                  >
-                    <Text className="text-center text-text font-pregular">
-                      {item}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-                <TouchableOpacity
-                  onPress={() => {
-                    setGender("")
-                    setGenderModalVisible(false)}}
-                  className="mt-2"
-                >
-                  <Text className="text-center text-sm text-muted underline font-pregular">
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -10,4 +10,5 @@ export const colors = {
   tabIconSelected: tintColor,
   muted: "#6B7280",
   mutedBg: "#E1E6E9",
+  mutedLight: "#FAFAFA",
 };

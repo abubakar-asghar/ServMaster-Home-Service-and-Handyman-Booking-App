@@ -18,8 +18,14 @@ import location from "../assets/icons/location.png";
 import aim from "../assets/icons/aim.png";
 import email from "../assets/icons/email.png";
 import phoneNumber from "../assets/icons/phone-number.png";
+import whatsapp from "../assets/icons/whatsapp.png";
+import call from "../assets/icons/call.png";
+import send from "../assets/icons/send.png";
 import password from "../assets/icons/password.png";
 import genders from "../assets/icons/genders.png";
+import back from "../assets/icons/back.png";
+import plus from "../assets/icons/plus.png";
+import attach from "../assets/icons/attach.png";
 // Services Categories :
 import cleaning from "../assets/icons/cleaning.png";
 import plumbing from "../assets/icons/plumbing.png";
@@ -34,6 +40,18 @@ import lawn from "../assets/icons/lawn.png";
 import renovation from "../assets/icons/renovation.png";
 import roof from "../assets/icons/roof.png";
 import solarSystem from "../assets/icons/solar-system.png";
+import terms from "../assets/icons/terms.png";
+import briefcase from "../assets/icons/briefcase.png";
+import support from "../assets/icons/support.png";
+import identity from "../assets/icons/identity.png";
+import professional from "../assets/icons/professional.png";
+import transactionHistory from "../assets/icons/transaction-history.png";
+import bellFill from "../assets/icons/bell-fill.png";
+import favorite from "../assets/icons/favorite.png";
+import star from "../assets/icons/star.png";
+import wallet from "../assets/icons/wallet.png";
+import info from "../assets/icons/info.png";
+import repairingService from "../assets/icons/repairing-service.png";
 
 export default {
   home,
@@ -53,10 +71,16 @@ export default {
   facebook,
   notification,
   aim,
+  send,
   email,
   phoneNumber,
   password,
   genders,
+  whatsapp,
+  call,
+  back,
+  plus,
+  attach,
   location,
   cleaning,
   plumbing,
@@ -71,4 +95,16 @@ export default {
   renovation,
   roof,
   solarSystem,
+  terms,
+  briefcase,
+  identity,
+  support,
+  bellFill,
+  transactionHistory,
+  professional,
+  favorite,
+  star,
+  wallet,
+  info,
+  repairingService,
 };

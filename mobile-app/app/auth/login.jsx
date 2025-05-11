@@ -6,29 +6,56 @@ import {
   Image,
   Dimensions,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import FormField from "../../components/ui/FormField";
 import CustomButton from "../../components/ui/CustomButton";
 import { icons, images } from "../../constants";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLoginUser } from "../../hooks/useAuth";
 
 const LoginScreen = () => {
-  const router = useRouter();
   const [form, setForm] = useState({
-    // email: "",
     phone: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/(tabs)/home"); // Navigate to home screen
-    }, 2000);
+  const [errors, setErrors] = useState({});
+  // const [loading, setLoading] = useState(false);
+
+  const { mutateAsync: loginUser, isPending } = useLoginUser();
+
+  // Validation
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.phone) {
+      newErrors.phone = "Phone number is required.";
+    } else if (!/^\d{11}$/.test(form.phone)) {
+      newErrors.phone = "Phone number must be exactly 11 digits.";
+    } else if (!/^03\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Phone number must start with 03.";
+    }
+
+    if (!form.password) {
+      newErrors.password = "Password is required.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle Login Functionality
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+
+    try {
+      await loginUser(form);
+    } catch (error) {
+      Alert.alert("Login Failed", "Invalid phone number or password.");
+    }
   };
 
   return (
@@ -50,18 +77,7 @@ const LoginScreen = () => {
             Welcome Back
           </Text>
 
-          {/* <FormField
-            // title="Email"
-            placeholder={"Email"}
-            icon={icons.email}
-            value={form.email}
-            handleChangeText={(text) => setForm({ ...form, email: text })}
-            otherStyles="mt-7"
-            keyboardType="email-address"
-          /> */}
-
           <FormField
-            // title="Phone Number"
             placeholder={"Phone Number"}
             icon={icons.phoneNumber}
             value={form.phone}
@@ -69,9 +85,9 @@ const LoginScreen = () => {
             otherStyles="mt-7"
             keyboardType="phone-pad"
           />
+          {errors.phone && <ErrorText error={errors.phone} />}
 
           <FormField
-            // title="Password"
             placeholder={"Password"}
             icon={icons.password}
             value={form.password}
@@ -79,6 +95,7 @@ const LoginScreen = () => {
             otherStyles="mt-7"
             secureTextEntry
           />
+          {errors.password && <ErrorText error={errors.password} />}
 
           <TouchableOpacity className="mt-2 self-end">
             <Link
@@ -92,7 +109,7 @@ const LoginScreen = () => {
           <CustomButton
             title="Login"
             handlePress={handleLogin}
-            isLoading={loading}
+            isLoading={isPending}
             containerStyles="bg-primary mt-7"
           />
 

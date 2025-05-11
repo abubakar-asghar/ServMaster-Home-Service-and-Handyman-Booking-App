@@ -4,6 +4,32 @@ import ErrorHandler from "../utils/errorHandler.js";
 import Customer from "../models/customer.model.js";
 import ServiceProvider from "../models/serviceProvider.model.js";
 
+export const isAuthenticatedUser = asyncHandler(async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
+
+  if (!token) {
+    return next(new ErrorHandler("Access Denied! No token provided.", 401));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+
+    if (decoded.role === "service-provider") {
+      req.user = await ServiceProvider.findById(decoded.id).select("-password");
+    } else if (decoded.role === "customer") {
+      req.user = await Customer.findById(decoded.id).select("-password");
+    }
+
+    if (!req.user) {
+      return next(new ErrorHandler("Customer not found!", 404));
+    }
+
+    next();
+  } catch (error) {
+    return next(new ErrorHandler("Invalid or Expired Token!", 401));
+  }
+});
+
 // Verify JWT Token and Attach User to Request (for Customers)
 export const isAuthenticatedCustomer = asyncHandler(async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header

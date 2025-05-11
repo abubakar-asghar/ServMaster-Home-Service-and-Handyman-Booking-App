@@ -16,9 +16,9 @@ const serviceRequestSchema = new mongoose.Schema({
     ref: "ServiceCategory",
     required: true,
   },
-  sub_service_id: {
+  service_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "SubService",
+    ref: "Service",
   },
   status: {
     type: String,
@@ -26,6 +26,7 @@ const serviceRequestSchema = new mongoose.Schema({
     default: "pending",
   },
   scheduled_time: { type: Date },
+  address: { type: String, trim: true },
   customer_notes: { type: String, trim: true },
   created_at: { type: Date, default: Date.now },
 });

@@ -14,9 +14,9 @@ export default function SelectRole() {
       await AsyncStorage.setItem("user_role", role);
 
       if (role === "customer") {
-        router.replace("/auth/customer-register");
+        router.push("/auth/customer-register");
       } else if (role === "provider") {
-        router.replace("/auth/provider-register");
+        router.push("/auth/provider-register");
       }
     } catch (error) {
       console.error("Error saving role:", error);

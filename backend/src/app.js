@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 // import http from "http";
 // import { Server } from "socket.io";
 
@@ -9,22 +10,27 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 
 app.use(express.json());
 app.use(cookieParser());
+// Logger Middleware
+app.use(morgan("combined"));
 
 // Routes Imports
+import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import customerRoutes from "./routes/customer.routes.js";
-import serviceProviderRoutes from "./routes/serviceprovider.routes.js";
-import serviceCategoryRoutes from "./routes/servicecategory.routes.js";
-import subServiceRoutes from "./routes/subservice.routes.js";
-import serviceRequestRoutes from "./routes/servicerequest.routes.js";
+import serviceProviderRoutes from "./routes/serviceProvider.routes.js";
+import serviceCategoryRoutes from "./routes/serviceCategory.routes.js";
+import serviceRoutes from "./routes/service.routes.js";
+import serviceRequestRoutes from "./routes/serviceRequest.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 
+// Routes
+app.use("/api/auth", authRoutes)
 app.use("/api/admin", adminRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/service-providers", serviceProviderRoutes);
 app.use("/api/service-categories", serviceCategoryRoutes);
-app.use("/api/sub-services", subServiceRoutes);
+app.use("/api/services", serviceRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/chats", chatRoutes);

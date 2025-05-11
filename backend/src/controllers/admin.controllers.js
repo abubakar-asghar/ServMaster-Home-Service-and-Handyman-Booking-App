@@ -6,9 +6,11 @@ import ErrorHandler from "../utils/errorHandler.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-// @desc    Admin Login
-// @route   POST /api/admin/login
-// @access  Public
+/**
+ * @desc    Admin Login
+ * @route   POST /api/admin/login
+ * @access  Public
+ */
 export const adminLogin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -39,9 +41,11 @@ export const adminLogin = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, token, admin });
 });
 
-// @desc    Create Admin
-// @route   POST /api/admin/create
-// @access  Private (Admin)
+/**
+ * @desc    Create Admin
+ * @route   POST /api/admin/create
+ * @access  Private (Admin)
+ */
 export const createAdmin = asyncHandler(async (req, res, next) => {
   const { name, email, password, role, permissions } = req.body;
 
@@ -68,25 +72,31 @@ export const createAdmin = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Admin created successfully", newAdmin });
 });
 
-// @desc    Get All Customers
-// @route   GET /api/admin/customers
-// @access  Private (Admin)
+/**
+ * @desc    Get All Customers
+ * @route   GET /api/admin/customers
+ * @access  Private (Admin)
+ */
 export const getAllCustomers = asyncHandler(async (req, res, next) => {
   const customers = await Customer.find();
   res.status(200).json({ success: true, customers });
 });
 
-// @desc    Get All Service Providers
-// @route   GET /api/admin/service-providers
-// @access  Private (Admin)
+/**
+ * @desc    Get All Service Providers
+ * @route   GET /api/admin/service-providers
+ * @access  Private (Admin)
+ */
 export const getAllServiceProviders = asyncHandler(async (req, res, next) => {
   const providers = await ServiceProvider.find();
   res.status(200).json({ success: true, providers });
 });
 
-// @desc    Delete Customer
-// @route   DELETE /api/admin/customer/:id
-// @access  Private (Admin)
+/**
+ * @desc    Delete Customer
+ * @route   DELETE /api/admin/customer/:id
+ * @access  Private (Admin)
+ */
 export const deleteCustomer = asyncHandler(async (req, res, next) => {
   const customer = await Customer.findById(req.params.id);
   if (!customer) {
@@ -99,9 +109,11 @@ export const deleteCustomer = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Customer deleted successfully" });
 });
 
-// @desc    Delete Service Provider
-// @route   DELETE /api/admin/service-provider/:id
-// @access  Private (Admin)
+/**
+ * @desc    Delete Service Provider
+ * @route   DELETE /api/admin/service-provider/:id
+ * @access  Private (Admin)
+ */
 export const deleteServiceProvider = asyncHandler(async (req, res, next) => {
   const provider = await ServiceProvider.findById(req.params.id);
   if (!provider) {
@@ -114,9 +126,11 @@ export const deleteServiceProvider = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Service provider deleted successfully" });
 });
 
-// @desc    Get Admin Profile
-// @route   GET /api/admin/profile
-// @access  Private (Admin)
+/**
+ * @desc    Get Admin Profile
+ * @route   GET /api/admin/profile
+ * @access  Private (Admin)
+ */
 export const getAdminProfile = asyncHandler(async (req, res, next) => {
   const admin = await Admin.findById(req.admin.id).select("-password");
   if (!admin) {

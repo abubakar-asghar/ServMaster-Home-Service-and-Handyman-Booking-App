@@ -1,27 +1,21 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import Customer from "../models/customer.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
+import { generateToken } from "../services/generateJWTToken.js";
 
-// Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
-};
-
-// @desc    Register a new customer
-// @route   POST /api/customers/register
-// @access  Public
+/**
+ * @desc    Register a new customer
+ * @route   POST /api/customers/register
+ * @access  Public
+ */
 export const registerCustomer = asyncHandler(async (req, res, next) => {
-  const { name, email, phone, password } = req.body;
+  const { name, phone, password } = req.body;
 
   // Check if customer exists
-  const existingCustomer = await Customer.findOne({ email });
+  const existingCustomer = await Customer.findOne({ phone });
   if (existingCustomer) {
     return next(new ErrorHandler("Customer already exists", 400));
   }
@@ -33,67 +27,28 @@ export const registerCustomer = asyncHandler(async (req, res, next) => {
   // Create new customer
   const customer = await Customer.create({
     name,
-    email,
     phone,
     password: hashedPassword,
     profile_image: "https://example.com/default-profile.jpg", // Hardcoded for now
   });
 
   // Generate token
-  const token = generateToken(customer._id);
+  const token = generateToken(customer._id, "customer");
 
   res.status(201).json({
     success: true,
     message: "Customer registered successfully",
+    data: customer,
     token,
-    customer: {
-      id: customer._id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      profile_image: customer.profile_image,
-    },
+    role: "customer",
   });
 });
 
-// @desc    Login customer
-// @route   POST /api/customers/login
-// @access  Public
-export const loginCustomer = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  // Find customer
-  const customer = await Customer.findOne({ email });
-  if (!customer) {
-    return next(new ErrorHandler("Invalid email or password", 401));
-  }
-
-  // Check password
-  const isMatch = await bcrypt.compare(password, customer.password);
-  if (!isMatch) {
-    return next(new ErrorHandler("Invalid email or password", 401));
-  }
-
-  // Generate token
-  const token = generateToken(customer._id);
-
-  res.status(200).json({
-    success: true,
-    message: "Login successful",
-    token,
-    customer: {
-      id: customer._id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      profile_image: customer.profile_image,
-    },
-  });
-});
-
-// @desc    Get all customers
-// @route   GET /api/customers/all
-// @access  Private (Admin only)
+/**
+ * @desc    Get all customers
+ * @route   GET /api/customers/all
+ * @access  Private (Admin only)
+ */
 export const getAllCustomers = asyncHandler(async (req, res, next) => {
   const customers = await Customer.find();
 
@@ -104,9 +59,11 @@ export const getAllCustomers = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Get single customer by ID
-// @route   GET /api/customers/:id
-// @access  Private (Admin or Self)
+/**
+ * @desc    Get single customer by ID
+ * @route   GET /api/customers/:id
+ * @access  Private (Admin or Self)
+ */
 export const getCustomerById = asyncHandler(async (req, res, next) => {
   const customer = await Customer.findById(req.params.id);
 
@@ -120,9 +77,11 @@ export const getCustomerById = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Update customer details
-// @route   PUT /api/customers/:id
-// @access  Private (Only customer)
+/**
+ * @desc    Update customer details
+ * @route   PUT /api/customers/:id
+ * @access  Private (Only customer)
+ */
 export const updateCustomer = asyncHandler(async (req, res, next) => {
   const { name, phone, profile_image } = req.body;
 
@@ -144,9 +103,11 @@ export const updateCustomer = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Delete customer
-// @route   DELETE /api/customers/:id
-// @access  Private (Admin only)
+/**
+ * @desc    Delete customer
+ * @route   DELETE /api/customers/:id
+ * @access  Private (Admin only)
+ */
 export const deleteCustomer = asyncHandler(async (req, res, next) => {
   const customer = await Customer.findById(req.params.id);
 
@@ -183,9 +144,11 @@ const sendEmail = async (email, subject, message) => {
   });
 };
 
-// @desc    Forgot Password (Send OTP)
-// @route   POST /api/customers/forgot-password
-// @access  Public
+/**
+ * @desc    Forgot Password (Send OTP)
+ * @route   POST /api/customers/forgot-password
+ * @access  Public
+ */
 export const forgotPassword = asyncHandler(async (req, res, next) => {
   const { email } = req.body;
   const customer = await Customer.findOne({ email });
@@ -207,9 +170,11 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Reset Password
-// @route   POST /api/customers/reset-password
-// @access  Public
+/**
+ * @desc    Reset Password
+ * @route   POST /api/customers/reset-password
+ * @access  Public
+ */
 export const resetPassword = asyncHandler(async (req, res, next) => {
   const { email, otp, newPassword } = req.body;
 

@@ -3,7 +3,7 @@ import { View, Text, Button, TouchableOpacity, ScrollView } from "react-native";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

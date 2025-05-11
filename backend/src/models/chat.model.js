@@ -4,16 +4,25 @@ const chatSchema = new mongoose.Schema(
   {
     participants: [
       {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          refPath: 'participants.participantType',
+        },
+        participantType: {
+          type: String,
+          enum: ['Customer', 'ServiceProvider'],
+          required: true,
+        },
+      }
+    ],    
+    messages: [
+      {
         type: mongoose.Schema.Types.ObjectId,
-        refPath: "participantType",
-        required: true,
+        ref: "Message",
+        default: [],
       },
     ],
-    participantType: {
-      type: [String],
-      enum: ["Customer", "ServiceProvider"],
-      required: true,
-    },
     lastMessage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",

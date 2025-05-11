@@ -7,17 +7,10 @@ const customerSchema = new mongoose.Schema({
     trim: true,
     minlength: [3, "Name must be at least 3 characters long"],
   },
-  email: {
-    type: String,
-    unique: true,
-    required: [true, "Email is required"],
-    match: [/.+\@.+\..+/, "Invalid email format"],
-  },
   phone: {
     type: String,
     unique: true,
     required: [true, "Phone number is required"],
-    match: [/^\d{10,15}$/, "Invalid phone number format"],
   },
   password: {
     type: String,
@@ -31,6 +24,29 @@ const customerSchema = new mongoose.Schema({
       validator: (v) => /^https?:\/\/\S+$/.test(v),
       message: "Invalid URL format for profile image",
     },
+  },
+  address: {
+    type: String,
+    trim: true,
+  },
+  city: {
+    type: String,
+    trim: true,
+  },
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      index: "2dsphere",
+    },
+  },
+  isPhoneVerified: {
+    type: Boolean,
+    default: false,
   },
   created_at: { type: Date, default: Date.now },
 });

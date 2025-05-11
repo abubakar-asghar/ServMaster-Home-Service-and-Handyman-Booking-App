@@ -3,6 +3,8 @@ import Customer from "../models/customer.model.js";
 import ServiceProvider from "../models/serviceProvider.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
+import Chat from "../models/chat.model.js";
+import Message from "../models/message.model.js";
 
 /**
  * @desc    Create a new service request
@@ -107,6 +109,44 @@ export const updateServiceRequestStatus = asyncHandler(
 
     serviceRequest.status = status;
     await serviceRequest.save();
+
+    // ✅ Create chat if status becomes "accepted"
+    if (status === "accepted") {
+      const customerId = serviceRequest.customer_id;
+      const providerId = serviceRequest.service_provider_id;
+
+      // Check if chat already exists between these two
+      const existingChat = await Chat.findOne({
+        "participants.user": { $all: [customerId, providerId] },
+      });
+
+      if (!existingChat) {
+        // Create new chat
+        const newChat = new Chat({
+          participants: [
+            { user: customerId, participantType: "Customer" },
+            { user: providerId, participantType: "ServiceProvider" },
+          ],
+        });
+
+        await newChat.save();
+
+        // Send approval message
+        const approvalMessage = new Message({
+          sender: providerId,
+          senderType: "ServiceProvider",
+          chat: newChat._id,
+          text: "Your service request has been accepted. Let's chat!",
+        });
+
+        await approvalMessage.save();
+
+        // Update chat's lastMessage
+        newChat.lastMessage = approvalMessage._id;
+        newChat.messages.push(approvalMessage._id);
+        await newChat.save();
+      }
+    }
 
     res.status(200).json({
       success: true,

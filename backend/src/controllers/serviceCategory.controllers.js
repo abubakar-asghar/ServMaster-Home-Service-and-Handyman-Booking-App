@@ -2,9 +2,11 @@ import ServiceCategory from "../models/serviceCategory.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 
-// @desc    Create a new service category
-// @route   POST /api/service-categories
-// @access  Private (Admin only)
+/**
+ * @desc    Create a new service category
+ * @route   POST /api/service-categories/create
+ * @access  Private (Admin only)
+ */
 export const createServiceCategory = asyncHandler(async (req, res, next) => {
   const { name, description, icon } = req.body;
 
@@ -26,18 +28,25 @@ export const createServiceCategory = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Get all service categories
-// @route   GET /api/service-categories
-// @access  Public
+/**
+ * @desc    Get all service categories
+ * @route   GET /api/service-categories/all
+ * @access  Public
+ */
 export const getAllServiceCategories = asyncHandler(async (req, res, next) => {
   const categories = await ServiceCategory.find();
   res.status(200).json({
     success: true,
-    categories,
+    message: "Service categories fetched successfully",
+    data: categories
   });
 });
 
-// Get single service category by ID
+/**
+ * @desc    Get single service category by ID
+ * @route   PUT /api/service-categories/:id
+ * @access  Public
+ */
 export const getServiceCategoryById = asyncHandler(async (req, res, next) => {
   const category = await ServiceCategory.findById(req.params.id);
   if (!category) {
@@ -50,9 +59,11 @@ export const getServiceCategoryById = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Update a service category
-// @route   PUT /api/service-categories/:id
-// @access  Private (Admin only)
+/**
+ * @desc    Update a service category
+ * @route   PUT /api/service-categories/:id
+ * @access  Private (Admin only)
+ */
 export const updateServiceCategory = asyncHandler(async (req, res, next) => {
   const { name, description, icon } = req.body;
   let category = await ServiceCategory.findById(req.params.id);
@@ -74,9 +85,11 @@ export const updateServiceCategory = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Delete a service category
-// @route   DELETE /api/service-categories/:id
-// @access  Private (Admin only)
+/**
+ * @desc    Delete a service category
+ * @route   DELETE /api/service-categories/:id
+ * @access  Private (Admin only)
+ */
 export const deleteServiceCategory = asyncHandler(async (req, res, next) => {
   const category = await ServiceCategory.findById(req.params.id);
   if (!category) {

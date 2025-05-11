@@ -11,12 +11,13 @@ module.exports = {
         background: "#FFFFFF", // White
         section: {
           DEFAULT: "#e5eaed", // for light section backgrounds
-          dark: "#d1d5db",     // optional dark version if needed
+          dark: "#d1d5db", // optional dark version if needed
         },
         text: "#1F2937", // Black
         muted: {
           DEFAULT: "#6B7280",
           100: "#E1E6E9",
+          light: "#FAFAFA",
         },
         success: "#22c55e",
         error: "#ef4444",

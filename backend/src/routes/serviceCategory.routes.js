@@ -9,7 +9,8 @@ import {
 
 const router = Router();
 
-router.route("/").post(createServiceCategory).get(getAllServiceCategories);
+router.route("/create").post(createServiceCategory)
+router.route("/all").get(getAllServiceCategories);
 router
   .route("/:id")
   .get(getServiceCategoryById)
