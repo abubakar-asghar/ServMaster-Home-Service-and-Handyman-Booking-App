@@ -17,7 +17,8 @@ dotenv.config({ path: "src/.env" });
 // Database Connection
 connectDB();
 
-export const handler = serverless(app);
+const handler = serverless(app);
+export default handler;
 
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
