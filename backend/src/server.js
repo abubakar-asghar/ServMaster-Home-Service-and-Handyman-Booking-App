@@ -31,12 +31,12 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-// Unhandled Promise Rejections
-process.on("unhandledRejection", (err) => {
-  console.log(`Error: ${err.message}`);
-  console.log(`Shutting down the Server due to Unhandled Promise Rejections`);
+// // Unhandled Promise Rejections
+// process.on("unhandledRejection", (err) => {
+//   console.log(`Error: ${err.message}`);
+//   console.log(`Shutting down the Server due to Unhandled Promise Rejections`);
 
-  server.close(() => {
-    process.exit(1);
-  });
-});
+//   server.close(() => {
+//     process.exit(1);
+//   });
+// });
