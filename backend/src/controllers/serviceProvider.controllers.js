@@ -327,12 +327,12 @@ export const addServices = asyncHandler(async (req, res, next) => {
 
 /**
  * @desc    Admin: Get all service providers
- * @route   GET /api/service-providers
+ * @route   GET /api/service-providers/all
  * @access  Admin
  */
 export const getAllServiceProviders = asyncHandler(async (req, res, next) => {
   const providers = await ServiceProvider.find().populate(
-    "services.categoryId services.services"
+    "services.category services.subServices"
   );
   res.json(providers);
 });

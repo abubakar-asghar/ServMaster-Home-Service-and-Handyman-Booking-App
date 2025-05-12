@@ -10,10 +10,10 @@ export const useRegisterProvider = () => {
     mutationFn: registerProvider,
     mutationKey: ["register-provider"],
     onSuccess: (data) => {
-      Alert.alert("Register Succuess", data?.message);
+      Alert.alert("Succuess", data?.message);
     },
     onError: (error) => {
-      Alert.alert("Register Error", error?.message);
+      Alert.alert("Error", error?.message);
     },
   });
 };

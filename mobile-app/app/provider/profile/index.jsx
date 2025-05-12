@@ -7,22 +7,8 @@ import ProfileNotificationIcon from "../../../components/profile/ProfileNotifica
 import ProfileContentHeading from "../../../components/profile/ProfileContentHeading";
 import ProfileContentLink from "../../../components/profile/ProfileContentLink";
 import ProfileLogoutBtn from "../../../components/profile/ProfileLogoutBtn";
-import { useRouter } from "expo-router";
-import { clearStorage } from "../../../utils/storage";
-import { logout } from "../../../store/slices/authSlice";
-import { useDispatch } from "react-redux";
 
 export default function Profile() {
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    dispatch(logout);
-    await clearStorage();
-
-    router.replace("/auth/login");
-  };
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
@@ -125,7 +111,7 @@ export default function Profile() {
           ))}
 
           {/* Logout Button */}
-          <ProfileLogoutBtn onPress={handleLogout} />
+          <ProfileLogoutBtn />
         </View>
       </ScrollView>
     </SafeAreaView>

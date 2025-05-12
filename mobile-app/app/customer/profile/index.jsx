@@ -1,34 +1,14 @@
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../../constants";
 import { colors } from "../../../constants/colors";
 import TabHeader from "../../../components/ui/TabHeader";
-import { useRouter } from "expo-router";
 import ProfileNotificationIcon from "../../../components/profile/ProfileNotificationIcon";
 import ProfileContentHeading from "../../../components/profile/ProfileContentHeading";
 import ProfileContentLink from "../../../components/profile/ProfileContentLink";
 import ProfileLogoutBtn from "../../../components/profile/ProfileLogoutBtn";
-import { clearStorage } from "../../../utils/storage";
-import { useDispatch } from "react-redux";
-import { logout } from "../../../store/slices/authSlice";
 
 export default function CustomerProfileTab() {
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    dispatch(logout);
-    await clearStorage();
-
-    router.replace("/auth/login");
-  };
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
@@ -103,7 +83,7 @@ export default function CustomerProfileTab() {
           ))}
 
           {/* Logout Button */}
-          <ProfileLogoutBtn onPress={handleLogout} />
+          <ProfileLogoutBtn />
         </View>
       </ScrollView>
     </SafeAreaView>
