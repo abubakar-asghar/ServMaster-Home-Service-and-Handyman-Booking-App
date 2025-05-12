@@ -22,9 +22,11 @@ import upload from "../middlewares/multerMiddleware.js";
 
 const router = Router();
 
+// Admin/Management Route
+router.get("/all", getAllServiceProviders);
+
 // Public Route
 router.post("/register", registerServiceProvider);
-router.get("/:serviceId", getServiceProviderProfile);
 
 // Protected Routes
 // router.use(authenticateUser);
@@ -50,7 +52,7 @@ router.post("/upload/selfie", upload.single("selfie"), uploadSelfie);
 
 router.put("/services", addServices);
 
-// Admin/Management Route
-router.get("/all", getAllServiceProviders);
+// Getting all ServiceProviders of specific Service ID
+router.get("/:serviceId", getServiceProviderProfile);
 
 export default router;

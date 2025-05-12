@@ -331,10 +331,15 @@ export const addServices = asyncHandler(async (req, res, next) => {
  * @access  Admin
  */
 export const getAllServiceProviders = asyncHandler(async (req, res, next) => {
-  const providers = await ServiceProvider.find().populate(
-    "services.category services.subServices"
-  );
-  res.json(providers);
+  const providers = await ServiceProvider.find().populate([
+    { path: "services.category", strictPopulate: false },
+    { path: "services.subServices", strictPopulate: false },
+  ]);
+  res.status(200).json({
+    success: true,
+    message: "All Service Providers fetched successfully",
+    data: providers,
+  });
 });
 
 /**
