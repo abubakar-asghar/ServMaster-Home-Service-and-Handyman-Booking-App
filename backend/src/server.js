@@ -21,22 +21,26 @@ app.get("/", (req, res) => {
   res.send("API is working!");
 });
 
-const handler = serverless(app);
-export default handler;
+// const handler = serverless(app);
+// export default handler;
 
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-  });
-}
+const server = app.listen(process.env.PORT || 5000, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
 
-// // Unhandled Promise Rejections
-// process.on("unhandledRejection", (err) => {
-//   console.log(`Error: ${err.message}`);
-//   console.log(`Shutting down the Server due to Unhandled Promise Rejections`);
-
-//   server.close(() => {
-//     process.exit(1);
+// if (process.env.NODE_ENV !== "production") {
+//   const PORT = process.env.PORT || 5000;
+//   app.listen(PORT, () => {
+//     console.log(`🚀 Server running at http://localhost:${PORT}`);
 //   });
-// });
+// }
+
+// Unhandled Promise Rejections
+process.on("unhandledRejection", (err) => {
+  console.log(`Error: ${err.message}`);
+  console.log(`Shutting down the Server due to Unhandled Promise Rejections`);
+
+  server.close(() => {
+    process.exit(1);
+  });
+});
