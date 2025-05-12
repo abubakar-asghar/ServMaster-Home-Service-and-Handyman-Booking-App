@@ -17,6 +17,10 @@ dotenv.config({ path: "src/.env" });
 // Database Connection
 connectDB();
 
+app.get("/", (req, res) => {
+  res.send("API is working!");
+});
+
 const handler = serverless(app);
 export default handler;
 
