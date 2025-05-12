@@ -1,6 +1,7 @@
 import app from "./app.js";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import serverless from "serverless-http";
 
 // Handling Uncaught Exception
 process.on("uncaughtException", (err) => {
@@ -16,9 +17,14 @@ dotenv.config({ path: "src/.env" });
 // Database Connection
 connectDB();
 
-const server = app.listen(process.env.PORT, () => {
-  console.log(`Server is working on http://localhost:${process.env.PORT}`);
-});
+export const handler = serverless(app);
+
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
+}
 
 // Unhandled Promise Rejections
 process.on("unhandledRejection", (err) => {
