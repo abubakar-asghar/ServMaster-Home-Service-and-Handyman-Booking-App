@@ -1,10 +1,10 @@
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
-import { clearStorage } from "../utils/storage";
+import { clearStorage, getUserFromStorage } from "../utils/storage";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 
 const API_BASE_URL = "http://192.168.0.104:5000";
+// const API_BASE_URL = "https://servmaster-backend.vercel.app";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -15,12 +15,9 @@ const axiosInstance = axios.create({
 // Automatically attach token from secure storage
 axiosInstance.interceptors.request.use(
   async (config) => {
-    const authData = await SecureStore.getItemAsync("auth");
-    const parsed = authData ? JSON.parse(authData) : null;
-    const token = parsed?.token;
-
+    const authData = await getUserFromStorage();
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${authData.token}`;
     }
 
     return config;

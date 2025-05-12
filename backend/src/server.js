@@ -21,19 +21,9 @@ app.get("/", (req, res) => {
   res.send("API is working!");
 });
 
-// const handler = serverless(app);
-// export default handler;
-
 const server = app.listen(process.env.PORT || 5000, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${process.env.PORT}`);
 });
-
-// if (process.env.NODE_ENV !== "production") {
-//   const PORT = process.env.PORT || 5000;
-//   app.listen(PORT, () => {
-//     console.log(`🚀 Server running at http://localhost:${PORT}`);
-//   });
-// }
 
 // Unhandled Promise Rejections
 process.on("unhandledRejection", (err) => {
