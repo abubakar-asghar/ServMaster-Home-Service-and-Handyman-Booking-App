@@ -1,7 +1,6 @@
 import app from "./app.js";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import serverless from "serverless-http";
 
 // Handling Uncaught Exception
 process.on("uncaughtException", (err) => {

@@ -67,9 +67,11 @@ const ProviderTabsLayout = () => {
             borderTopColor: colors.muted,
             borderColor: "transparent",
             shadowColor: "white",
-            height: 80,
+            height: 100,
             paddingTop: 15,
-            paddingBottom: 10,
+            paddingBottom: 30,
+            position: "absolute",
+            bottom: 0,
           },
         })}
       >
@@ -103,7 +105,7 @@ const ProviderTabsLayout = () => {
         ))}
       </Tabs>
 
-      <StatusBar backgroundColor={colors.primary} style="light" />
+      <StatusBar backgroundColor={"transparent"} style="dark" />
     </>
   );
 };

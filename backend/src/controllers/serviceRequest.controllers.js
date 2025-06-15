@@ -180,3 +180,30 @@ export const deleteServiceRequest = asyncHandler(async (req, res, next) => {
     .status(200)
     .json({ success: true, message: "Service request deleted successfully" });
 });
+
+/**
+ * @desc    Get service request detail
+ * @route   GET /api/service-requests/:id
+ * @access  Private (Authenticated Users Only)
+ */
+export const getBookingDetails = asyncHandler(async (req, res, next) => {
+  const requestId = req.params.id;
+
+  const serviceRequest = await ServiceRequest.findById(requestId)
+    .populate("service_provider_id", "name email phone")
+    .populate("service_provider_id", "name email phone")
+    .populate("service_category_id", "name")
+    .populate("sub_service_id", "name");
+
+  if (!serviceRequest) {
+    return next(
+      new ErrorHandler("Service request not found or unauthorized", 404)
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Service request fetched successfully",
+    data: serviceRequest,
+  });
+});

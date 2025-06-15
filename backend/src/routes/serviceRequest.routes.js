@@ -4,9 +4,10 @@ import {
   getCustomerRequests,
   getProviderRequests,
   updateServiceRequestStatus,
-  deleteServiceRequest
+  deleteServiceRequest,
+  getBookingDetails
 } from "../controllers/serviceRequest.controllers.js";
-import { isAuthenticatedCustomer, isAuthenticatedServiceProvider } from "../middlewares/authMiddleware.js";
+import { isAuthenticatedCustomer, isAuthenticatedServiceProvider, isAuthenticatedUser } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
@@ -18,6 +19,9 @@ router.get("/customer", isAuthenticatedCustomer, getCustomerRequests);
 
 // Get all service requests assigned to a provider
 router.get("/provider", isAuthenticatedServiceProvider, getProviderRequests);
+
+// Get service request detail of a customer
+router.get("/:id", isAuthenticatedUser, getBookingDetails)
 
 // Service provider updates the request status
 router.put("/:id", isAuthenticatedServiceProvider, updateServiceRequestStatus);

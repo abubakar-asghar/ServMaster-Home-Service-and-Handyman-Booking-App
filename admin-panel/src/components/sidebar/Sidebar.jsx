@@ -1,188 +1,209 @@
+"use client";
+
 import {
   Calendar,
-  MonitorStop,
-  Inbox,
-  Search,
   SquareKanban,
-  ChartNoAxesCombined,
-  ChevronDown,
-  SquareUser,
-  KeyRound,
-  LogOut,
   UserRoundCog,
   SlidersHorizontal,
   Bolt,
   Shield,
   Flag,
   ClipboardCheck,
-  SquareMenu,
-  Logs,
-  MessageSquareDiff,
-  MessageSquareWarning,
   ShieldX,
-  BookUser,
-  BookmarkCheck,
-  SquareUserRound,
-  BookCheck,
+  Home,
+  ChartNoAxesCombined,
+  MessageCircleMore,
+  BookOpenText,
+  ShieldUser,
+  UserRound,
+  UserRoundPen,
+  LayoutList,
+  ShieldEllipsis,
 } from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSubButton,
+  SidebarHeader,
+  SidebarRail,
 } from "@/components/ui/sidebar";
+import { NavAdministrative } from "./NavAdministrative";
+import { NavMenu } from "./NavMenu";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-
-// Sidebar sub components
-const SidebarMenuSub = SidebarMenu;
-const SidebarMenuSubItem = SidebarMenuItem;
-
-// Menu items
-const items = [
-  {
+const items = {
+  dashboard: {
     title: "Dashboard",
     subMenu: [
-      { title: "Overview", url: "#", icon: SquareKanban },
-      { title: "Statistics", url: "#", icon: ChartNoAxesCombined },
-      { title: "Recent Activities", url: "#", icon: MonitorStop },
+      { title: "Overview", url: "/dashboard/overview", icon: SquareKanban },
+      {
+        title: "Statistics",
+        url: "/dashboard/statistics",
+        icon: ChartNoAxesCombined,
+      },
+      // {
+      //   title: "Recent Activities",
+      //   url: "/dashboard/recent-activities",
+      //   icon: MonitorStop,
+      // },
     ],
   },
-  {
-    title: "Customers Management",
-    subMenu: [
-      { title: "View All Customers", url: "#", icon: SquareUserRound },
-      { title: "Customer Details", url: "#", icon: BookUser },
-      { title: "Block/Unblock Customer", url: "#", icon: ShieldX },
-    ],
-  },
-  {
-    title: "Service Providers Management",
-    subMenu: [
-      { title: "Verify Service Providers", url: "#", icon: BookCheck },
-      { title: "View All Service Providers", url: "#", icon: BookUser },
-      { title: "Block/Unblock Providers", url: "#", icon: ShieldX },
-      { title: "Assign/Manage Services", url: "#", icon: BookmarkCheck },
-    ],
-  },
-  {
-    title: "Service Requests",
-    subMenu: [
-      { title: "All Requests", url: "#", icon: Inbox },
-      { title: "Pending Requests", url: "#", icon: Calendar },
-      { title: "Ongoing Requests", url: "#", icon: MonitorStop },
-      { title: "Completed Requests", url: "#", icon: SquareKanban },
-      { title: "Cancelled Requests", url: "#", icon: Calendar },
-    ],
-  },
-  {
-    title: "Chat Management",
-    subMenu: [
-      { title: "View All Chats", url: "#", icon: Inbox },
-      { title: "Reported Chats", url: "#", icon: MessageSquareWarning },
-    ],
-  },
-  {
-    title: "Reviews & Ratings",
-    subMenu: [
-      { title: "View All Reviews", url: "#", icon: MessageSquareDiff },
-      { title: "Reported Reviews", url: "#", icon: MessageSquareWarning },
-    ],
-  },
-  {
-    title: "Service Categories & Subservices",
-    subMenu: [
-      { title: "Manage Service Categories", url: "#", icon: SquareMenu },
-      { title: "Manage Subservices", url: "#", icon: Logs },
-    ],
-  },
-  {
+  administratives: [
+    {
+      title: "Customers Management",
+      icon: UserRound,
+      items: [
+        { title: "View All Customers", url: "/dashboard/customers/all" },
+        { title: "Customer Details", url: "/dashboard/customers/detail" },
+        {
+          title: "Block/Unblock Customer",
+          url: "/dashboard/customers/block-unblock",
+        },
+      ],
+    },
+    {
+      title: "Providers Management",
+      icon: UserRoundCog,
+      items: [
+        {
+          title: "Verify Service Providers",
+          url: "/dashboard/service-providers/verify",
+        },
+        {
+          title: "View All Service Providers",
+          url: "/dashboard/service-providers/all",
+        },
+        {
+          title: "Block/Unblock Providers",
+          url: "/dashboard/service-providers/block-unblock",
+        },
+        {
+          title: "Assign/Manage Services",
+          url: "/dashboard/service-providers/manage",
+        },
+      ],
+    },
+    {
+      title: "Bookings Management",
+      icon: Calendar,
+      items: [
+        { title: "All Bookings", url: "/dashboard/bookings/all" },
+        { title: "Pending Bookings", url: "/dashboard/bookings/pending" },
+        { title: "Ongoing Bookings", url: "/dashboard/bookings/ongoing" },
+        { title: "Completed Bookings", url: "/dashboard/bookings/completed" },
+        { title: "Cancelled Bookings", url: "/dashboard/bookings/cancelled" },
+      ],
+    },
+    {
+      title: "Chat Management",
+      icon: MessageCircleMore,
+      items: [
+        { title: "View All Chats", url: "/dashboard/chats/all" },
+        { title: "Reported Chats", url: "/dashboard/chats/reported" },
+      ],
+    },
+    {
+      title: "Reviews & Ratings",
+      icon: BookOpenText,
+      items: [
+        { title: "View All Reviews", url: "/dashboard/reviews-ratings/all" },
+        {
+          title: "Reported Reviews",
+          url: "/dashboard/reviews-ratings/reported",
+        },
+      ],
+    },
+    {
+      title: "Services Management",
+      icon: LayoutList,
+      items: [
+        {
+          title: "Manage Service Categories",
+          url: "/dashboard/services/categories",
+        },
+        {
+          title: "Manage Subservices",
+          url: "/dashboard/services/sub-services",
+        },
+      ],
+    },
+    {
+      title: "Admins Management",
+      icon: ShieldUser || ShieldEllipsis || ShieldX,
+      items: [
+        { title: "View All Admins", url: "/dashboard/admins/all" },
+        { title: "Add New Admin", url: "/dashboard/admins/add" },
+        { title: "Edit Admin Details", url: "/dashboard/admins/edit" },
+        { title: "Delete Admin", url: "/dashboard/admins/delete" },
+      ],
+    },
+  ],
+  reportcomplaints: {
     title: "Reports & Complaints",
     subMenu: [
-      { title: "View Reports", url: "#", icon: Flag },
-      { title: "Resolve Complaints", url: "#", icon: ClipboardCheck },
+      {
+        title: "View Reports",
+        url: "/dashboard/reports-complaints/view",
+        icon: Flag,
+      },
+      {
+        title: "Resolve Complaints",
+        url: "/dashboard/reports-complaints/resolve",
+        icon: ClipboardCheck,
+      },
     ],
   },
-  {
+  settings: {
     title: "Settings",
     subMenu: [
-      { title: "General Settings", url: "#", icon: SlidersHorizontal },
-      { title: "Manage Roles & Permissions", url: "#", icon: UserRoundCog },
-      { title: "System Configurations", url: "#", icon: Bolt },
-      { title: "Authentication & Security", url: "#", icon: Shield },
+      {
+        title: "General Settings",
+        url: "/dashboard/settings/general",
+        icon: SlidersHorizontal,
+      },
+      {
+        title: "Manage Roles & Permissions",
+        url: "/dashboard/settings/manage-role-permissions",
+        icon: UserRoundPen,
+      },
+      {
+        title: "System Configurations",
+        url: "/dashboard/settings/system-configurations",
+        icon: Bolt,
+      },
+      {
+        title: "Authentication & Security",
+        url: "/dashboard/settings/authentication-n-security",
+        icon: Shield,
+      },
     ],
   },
-  {
-    title: "Admin",
-    subMenu: [
-      { title: "Admin Profile", url: "#", icon: SquareUser },
-      { title: "Change Password", url: "#", icon: KeyRound },
-      { title: "Logout", url: "#", icon: LogOut },
-    ],
-  },
-];
+  // admin: {
+  //   title: "Admin",
+  //   subMenu: [
+  //     { title: "All Admins", url: "#", icon: ShieldUser || ShieldEllipsis || ShieldX },
+  //     { title: "Account", url: "#", icon: SquareUserRound },
+  //     { title: "Change Password", url: "#", icon: KeyRound },
+  //   ],
+  // },
+};
 
 const AppSidebar = () => {
   return (
     <Sidebar>
+      <SidebarHeader className="h-16 flex-row items-center">
+        <div className="flex items-center px-2 gap-2">
+          <Home className="h-4 w-4" />
+          <span className="text-lg font-semibold">ServMaster</span>
+        </div>
+      </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenu>
-            <Collapsible className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton asChild>
-                    <span>
-                      <Calendar />
-                      <span>{"item"}</span>
-                    </span>
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <a href="#">
-                          <span>{"sub item"}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          </SidebarMenu>
-        </SidebarGroup>
-        {items.map((menu) => (
-          <SidebarGroup key={menu.title}>
-            <SidebarGroupLabel>{menu.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menu.subMenu.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+        <NavMenu item={items.dashboard} />
+        <NavAdministrative items={items.administratives} />
+        <NavMenu item={items.reportcomplaints} />
+        <NavMenu item={items.settings} />
+        {/* <NavMenu item={items.admin} /> */}
       </SidebarContent>
+      <SidebarRail />
     </Sidebar>
   );
 };

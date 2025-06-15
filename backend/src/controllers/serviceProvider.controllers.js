@@ -48,7 +48,7 @@ export const registerServiceProvider = asyncHandler(async (req, res, next) => {
  */
 export const getServiceProviderProfile = asyncHandler(
   async (req, res, next) => {
-    const provider = await ServiceProvider.findById(req.user._id);
+    const provider = await ServiceProvider.findById(req.serviceProvider._id);
     if (!provider) return next(new ErrorHandler(404, "Provider not found"));
     res.status(200).json({
       success: true,
@@ -111,10 +111,13 @@ export const updatePersonalInfo = asyncHandler(async (req, res, next) => {
   }
 
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     { $set: updatedInfo },
     { new: true }
   );
+
+  provider.password = undefined;
+  if (!provider) return next(new ErrorHandler(404, "Provider not found"));
 
   res.status(200).json({
     success: true,
@@ -159,7 +162,7 @@ export const updateBusinessInfo = asyncHandler(async (req, res, next) => {
     updateFields["businessInfo.workingHours"] = workingHours;
 
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     { $set: updateFields },
     { new: true }
   );
@@ -179,7 +182,7 @@ export const updateBusinessInfo = asyncHandler(async (req, res, next) => {
 export const updatePassword = asyncHandler(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
 
-  const provider = await ServiceProvider.findById(req.user._id);
+  const provider = await ServiceProvider.findById(req.serviceProvider._id);
   if (!provider) return next(new ErrorHandler(404, "Provider not found"));
 
   const isMatch = await bcrypt.compare(oldPassword, provider.password);
@@ -201,7 +204,7 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
  */
 export const updatePhoneVerification = asyncHandler(async (req, res, next) => {
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     { "verification.phone": req.body },
     { new: true }
   );
@@ -220,7 +223,7 @@ export const updatePhoneVerification = asyncHandler(async (req, res, next) => {
 export const updateProfessionalVerification = asyncHandler(
   async (req, res, next) => {
     const provider = await ServiceProvider.findByIdAndUpdate(
-      req.user._id,
+      req.serviceProvider._id,
       { "verification.professional": req.body },
       { new: true }
     );
@@ -242,12 +245,12 @@ export const updateIdentityVerification = asyncHandler(
     const { cnicNumber } = req.body;
     const existing = await ServiceProvider.findOne({
       "verification.identity.cnicNumber": cnicNumber,
-      _id: { $ne: req.user._id },
+      _id: { $ne: req.serviceProvider._id },
     });
     if (existing) return next(new ErrorHandler(400, "CNIC already exists"));
 
     const provider = await ServiceProvider.findByIdAndUpdate(
-      req.user._id,
+      req.serviceProvider._id,
       {
         "verification.identity": {
           ...req.body,
@@ -270,7 +273,7 @@ export const uploadCNICImages = asyncHandler(async (req, res, next) => {
   const { cnicFront, cnicBack } = req.files;
 
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     {
       "verification.identity.cnicFront": cnicFront?.[0]?.path,
       "verification.identity.cnicBack": cnicBack?.[0]?.path,
@@ -287,7 +290,7 @@ export const uploadCNICImages = asyncHandler(async (req, res, next) => {
  */
 export const uploadSelfie = asyncHandler(async (req, res, next) => {
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     { "verification.identity.selfieImage": req.file.path },
     { new: true }
   );
@@ -302,7 +305,7 @@ export const uploadSelfie = asyncHandler(async (req, res, next) => {
 export const uploadWorkImages = asyncHandler(async (req, res, next) => {
   const imagePaths = req.files.map((file) => file.path);
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     { $push: { "portfolio.images": { $each: imagePaths } } },
     { new: true }
   );
@@ -318,7 +321,7 @@ export const addServices = asyncHandler(async (req, res, next) => {
   const { services } = req.body;
 
   const provider = await ServiceProvider.findByIdAndUpdate(
-    req.user._id,
+    req.serviceProvider._id,
     { services },
     { new: true }
   );

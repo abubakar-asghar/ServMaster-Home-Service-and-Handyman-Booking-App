@@ -3,6 +3,7 @@ import asyncHandler from "./catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import Customer from "../models/customer.model.js";
 import ServiceProvider from "../models/serviceProvider.model.js";
+import Admin from "../models/admin.model.js";
 
 export const isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
@@ -12,7 +13,7 @@ export const isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (decoded.role === "service-provider") {
       req.user = await ServiceProvider.findById(decoded.id).select("-password");
@@ -88,6 +89,7 @@ export const isAuthenticatedAdmin = asyncHandler(async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     req.admin = await Admin.findById(decoded.id).select("-password");
 
     if (!req.admin) {

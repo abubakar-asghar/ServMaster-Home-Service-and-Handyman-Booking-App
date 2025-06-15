@@ -74,7 +74,7 @@ function Root() {
         router.replace("/provider/home");
       }
     }
-  }, [fontsLoaded, error, checkingAuth, onboardingDone, user, role]);
+  }, [fontsLoaded, checkingAuth, onboardingDone, user, role]);
 
   // Block render until everything is loaded
   if (!fontsLoaded || onboardingDone === null || checkingAuth) return null;

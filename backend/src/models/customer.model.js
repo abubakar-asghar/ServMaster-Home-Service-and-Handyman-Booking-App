@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const customerSchema = new mongoose.Schema({
-  name: {
+  fullName: {
     type: String,
     required: [true, "Name is required"],
     trim: true,

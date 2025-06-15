@@ -1,12 +1,35 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import cors from "cors";
 // import http from "http";
 // import { Server } from "socket.io";
 
 const app = express();
 
 import errorMiddleware from "./middlewares/errorMiddleware.js";
+
+// const allowedOrigins = [
+//   "http://localhost:3000", // Admin panel (Next.js)
+//   "http://localhost:19006", // Expo dev tools
+//   "http://localhost:19000", // Expo web preview
+//   "exp://192.168.1.x:19000", // Expo Go app on device
+//   "http://192.168.1.x:8081", // Metro bundler on LAN
+//   "http://192.168.0.104:5000", // Metro bundler on LAN
+// ];
+
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true, // if you're using cookies (optional)
+//   })
+// );
 
 app.use(express.json());
 app.use(cookieParser());
@@ -25,7 +48,7 @@ import reviewRoutes from "./routes/review.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 
 // Routes
-app.use("/api/auth", authRoutes)
+app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/service-providers", serviceProviderRoutes);

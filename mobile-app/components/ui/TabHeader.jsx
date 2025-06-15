@@ -7,7 +7,7 @@ const TabHeader = ({ title, goBack }) => {
   const router = useRouter();
   return (
     <View
-      className="px-5 flex-row items-center justify-start bg-primary"
+      className="px-5 w-full flex-row items-center justify-start bg-primary"
       style={{ paddingVertical: 15 }}
     >
       {goBack && (

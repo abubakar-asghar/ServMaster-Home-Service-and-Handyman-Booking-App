@@ -55,7 +55,7 @@ const ProviderChat = () => {
                 key={item.id}
                 className="flex-row items-center py-3"
                 activeOpacity={0.7}
-                onPress={() => router.push(`/customer/chat/${item.id}`)}
+                onPress={() => router.push(`/provider/chat/${item.id}`)}
               >
                 <Image
                   source={item.profilePic}

@@ -8,11 +8,17 @@ import { useGetProvidersByService } from "../../../../../../hooks/useProvider";
 const ServiceProvidersBooking = () => {
   const { service } = useLocalSearchParams();
 
-  const {data, error, isPending} = useGetProvidersByService(service);
-  
+  const { data, error, isPending } = useGetProvidersByService(service);
+
   return (
     <SafeAreaView>
       <TabHeader title={"Book Service"} goBack />
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View className="flex-1 bg-white p-5 w-full">
+          
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

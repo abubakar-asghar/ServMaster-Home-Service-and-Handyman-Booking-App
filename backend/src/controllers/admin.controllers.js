@@ -3,8 +3,8 @@ import Customer from "../models/customer.model.js";
 import ServiceProvider from "../models/serviceProvider.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { generateToken } from "../services/generateJWTToken.js";
 
 /**
  * @desc    Admin Login
@@ -30,15 +30,11 @@ export const adminLogin = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
 
-  const token = jwt.sign(
-    { id: admin._id, role: admin.role },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    }
-  );
+  const token = generateToken(admin._id, admin.role);
 
-  res.status(200).json({ success: true, token, admin });
+  admin.password = undefined;
+
+  res.status(200).json({ success: true, token, data: admin });
 });
 
 /**
@@ -67,9 +63,13 @@ export const createAdmin = asyncHandler(async (req, res, next) => {
     permissions,
   });
 
-  res
-    .status(201)
-    .json({ success: true, message: "Admin created successfully", newAdmin });
+  newAdmin.password = undefined;
+
+  res.status(201).json({
+    success: true,
+    message: "Admin created successfully",
+    data: newAdmin,
+  });
 });
 
 /**
@@ -137,5 +137,9 @@ export const getAdminProfile = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler("Admin not found", 404));
   }
 
-  res.status(200).json({ success: true, admin });
+  res.status(200).json({
+    success: true,
+    message: "Admin profile fetched successfully",
+    data: admin,
+  });
 });

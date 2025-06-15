@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import Customer from "../models/customer.model.js";
+import ServiceProvider from "../models/serviceProvider.model.js";
 import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import { generateToken } from "../services/generateJWTToken.js";
@@ -12,12 +13,22 @@ import { generateToken } from "../services/generateJWTToken.js";
  * @access  Public
  */
 export const registerCustomer = asyncHandler(async (req, res, next) => {
-  const { name, phone, password } = req.body;
+  const { fullName, phone, password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    return next(new ErrorHandler(400, "Passwords do not match"));
+  }
 
   // Check if customer exists
-  const existingCustomer = await Customer.findOne({ phone });
-  if (existingCustomer) {
-    return next(new ErrorHandler("Customer already exists", 400));
+  let existingUser = await Customer.findOne({ phone });
+  if (!existingUser) {
+    existingUser = await ServiceProvider.findOne({ phone });
+  }
+
+  if (existingUser) {
+    return next(
+      new ErrorHandler("User already exists with this phone number", 400)
+    );
   }
 
   // Hash password
@@ -26,7 +37,7 @@ export const registerCustomer = asyncHandler(async (req, res, next) => {
 
   // Create new customer
   const customer = await Customer.create({
-    name,
+    fullName,
     phone,
     password: hashedPassword,
     profile_image: "https://example.com/default-profile.jpg", // Hardcoded for now
@@ -83,14 +94,14 @@ export const getCustomerById = asyncHandler(async (req, res, next) => {
  * @access  Private (Only customer)
  */
 export const updateCustomer = asyncHandler(async (req, res, next) => {
-  const { name, phone, profile_image } = req.body;
+  const { fullName, phone, profile_image } = req.body;
 
   const customer = await Customer.findById(req.params.id);
   if (!customer) {
     return next(new ErrorHandler("Customer not found", 404));
   }
 
-  customer.name = name || customer.name;
+  customer.fullName = fullName || customer.fullName;
   customer.phone = phone || customer.phone;
   customer.profile_image = profile_image || customer.profile_image;
 

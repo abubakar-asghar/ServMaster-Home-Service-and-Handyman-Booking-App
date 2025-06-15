@@ -13,6 +13,7 @@ import CustomButton from "../../components/ui/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../constants";
 import Checkbox from "expo-checkbox";
+import { useRegisterCustomer } from "../../hooks/useCustomer";
 
 const ErrorText = ({ error }) => {
   return (
@@ -24,23 +25,25 @@ const ErrorText = ({ error }) => {
 
 const CustomerRegister = () => {
   const router = useRouter();
+
+  const [errors, setErrors] = useState({});
+  const [agree, setAgree] = useState(false);
+
   const [form, setForm] = useState({
-    name: "",
+    fullName: "",
     phone: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [agree, setAgree] = useState(false);
+  const { mutateAsync: registerCustomer, isPending } = useRegisterCustomer();
 
   // Validation
   const validateForm = () => {
     const newErrors = {};
 
-    if (!form.name.trim()) {
-      newErrors.name = "Full name is required.";
+    if (!form.fullName.trim()) {
+      newErrors.fullName = "Full name is required.";
     }
 
     if (!form.phone) {
@@ -73,14 +76,27 @@ const CustomerRegister = () => {
   };
 
   // Handle Customer Registration
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!validateForm()) return;
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push("/customer/home");
-    }, 2000);
+    if (form.password !== form.confirmPassword) {
+      Alert.alert("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await registerCustomer(form);
+
+      if (response.success) {
+        router.push("/auth/login");
+      } else {
+        console.log(
+          response.message || "Registration failed. Please try again."
+        );
+      }
+    } catch (error) {
+      console.log("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -106,11 +122,11 @@ const CustomerRegister = () => {
           <FormField
             placeholder={"Full Name"}
             icon={icons.profile}
-            value={form.name}
-            handleChangeText={(text) => setForm({ ...form, name: text })}
+            value={form.fullName}
+            handleChangeText={(text) => setForm({ ...form, fullName: text })}
             otherStyles="mt-10"
           />
-          {errors.name && <ErrorText error={errors.name} />}
+          {errors.fullName && <ErrorText error={errors.fullName} />}
 
           <FormField
             placeholder={"Phone Number"}
@@ -165,7 +181,7 @@ const CustomerRegister = () => {
           <CustomButton
             title="Register"
             handlePress={handleRegister}
-            isLoading={loading}
+            isLoading={isPending}
             containerStyles="bg-primary mt-7"
           />
 

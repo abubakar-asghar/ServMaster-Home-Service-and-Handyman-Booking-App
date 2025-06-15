@@ -19,7 +19,7 @@ router.post("/login", adminLogin);
 router.get("/profile", isAuthenticatedAdmin, getAdminProfile);
 
 // Create New Admin (Super Admin Only)
-router.post("/create", isAuthenticatedAdmin, isSuperAdmin, createAdmin);
+router.post("/create", createAdmin);
 
 // Get Customers and Service Providers
 router.get("/customers", isAuthenticatedAdmin, getAllCustomers);

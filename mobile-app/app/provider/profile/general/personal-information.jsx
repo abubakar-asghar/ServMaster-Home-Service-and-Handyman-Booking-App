@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TabHeader from "../../../../components/ui/TabHeader";
 import FormField from "../../../../components/ui/FormField";
@@ -7,9 +7,20 @@ import CustomButton from "../../../../components/ui/CustomButton";
 import Dropdown from "../../../../components/ui/Dropdown";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
+import { useUpdateProviderPersonalInfo } from "../../../../hooks/useProvider";
+
+const ErrorText = ({ error }) => {
+  return (
+    <Text className="text-red-500 font-pregular text-sm mt-1 ml-2">
+      {error}
+    </Text>
+  );
+};
 
 const ProviderPersonalInfo = () => {
   const router = useRouter();
+
+  const [errors, setErrors] = useState({});
 
   const { user } = useSelector((state) => state.auth);
 
@@ -18,12 +29,71 @@ const ProviderPersonalInfo = () => {
     phone: user?.phone || "",
     whatsapp: user?.personalInfo?.whatsapp || "",
     email: user?.personalInfo?.email || "",
-    gender: user?.personalInfo?.gender || null,
+    gender: user?.personalInfo?.gender || "",
   });
 
+  const { mutateAsync: updateProviderPersonalInfo, isPending } =
+    useUpdateProviderPersonalInfo();
+
+  const getGenderFormat = {
+    male: "Male",
+    female: "Female",
+    prefer_not_to_say: "Prefer not to say",
+  };
+
+  // Validation
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required.";
+    }
+
+    if (formData.whatsapp && !/^\d{11}$/.test(formData.whatsapp)) {
+      newErrors.whatsapp = "Phone number must be exactly 11 digits.";
+    } else if (formData.whatsapp && !/^03\d{9}$/.test(formData.whatsapp)) {
+      newErrors.whatsapp = "Phone number must start with 03.";
+    }
+
+    if (
+      formData.email &&
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(formData.email)
+    ) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Set undefined for empty or null fields
+  const sanitizeFormData = (data) => {
+    const sanitizedData = { ...data };
+
+    for (const key in sanitizedData) {
+      if (sanitizedData[key] === "" || sanitizedData[key] === null) {
+        sanitizedData[key] = undefined;
+      }
+    }
+
+    return sanitizedData;
+  };
+
   const handleUpdatePersonalInfo = async () => {
-    // Handle the update logic here
-    console.log("Personal Info Updated", formData);
+    if (!validateForm()) return;
+
+    try {
+      const sanitizedData = sanitizeFormData(formData);
+      console.log("Sanitized Data:", sanitizedData);
+      const response = await updateProviderPersonalInfo(sanitizedData);
+
+      if (!response.success) {
+        console.log(response.message || "Updation failed. Please try again.");
+      }
+    } catch (error) {
+      console.log("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -43,13 +113,17 @@ const ProviderPersonalInfo = () => {
               setFormData({ ...formData, fullName: value });
             }}
           />
+          {errors.fullName && <ErrorText error={errors.fullName} />}
 
           {/* Mobile Number */}
           <FormField
             title="Mobile Number"
             placeholder="Enter your mobile number"
             icon={null}
-            handleChangeText={() => {}}
+            value={formData.phone}
+            handleChangeText={(value) => {
+              setFormData({ ...formData, phone: value });
+            }}
             otherStyles="mt-5"
             editable={false}
           />
@@ -65,6 +139,7 @@ const ProviderPersonalInfo = () => {
             }}
             otherStyles="mt-5"
           />
+          {errors.whatsapp && <ErrorText error={errors.whatsapp} />}
 
           {/* Email */}
           <FormField
@@ -77,19 +152,26 @@ const ProviderPersonalInfo = () => {
             }}
             otherStyles="mt-5"
           />
+          {errors.email && <ErrorText error={errors.email} />}
 
           {/* Gender Dropdown */}
           <View className="mt-5">
             <Text className="text-base text-text font-pmedium">Gender</Text>
             <Dropdown
               placeholder="Select Gender"
-              defaultValue={formData.gender}
+              defaultValue={getGenderFormat[formData.gender] || ""}
               data={[
                 { key: "1", value: "Male" },
                 { key: "2", value: "Female" },
-                { key: "3", value: "Not specified" },
+                { key: "3", value: "Prefer not to say" },
               ]}
-              onChange={(value) => setFormData({ ...formData, gender: value })}
+              onChange={(value) => {
+                console.log("Selected", value);
+                setFormData({
+                  ...formData,
+                  gender: value,
+                });
+              }}
             />
           </View>
         </View>
@@ -104,8 +186,9 @@ const ProviderPersonalInfo = () => {
         />
         <CustomButton
           title={"Update"}
-          handlePress={() => handleUpdatePersonalInfo()}
+          handlePress={handleUpdatePersonalInfo}
           containerStyles={"bg-primary w-[48%]"}
+          isLoading={isPending}
         />
       </View>
     </SafeAreaView>

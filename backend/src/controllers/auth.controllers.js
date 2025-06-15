@@ -9,7 +9,9 @@ export const loginUser = asyncHandler(async (req, res, next) => {
   const { phone, password } = req.body;
 
   if (!phone || !password) {
-    return next(new ErrorHandler(400, "Please provide both phone and password"));
+    return next(
+      new ErrorHandler(400, "Please provide both phone and password")
+    );
   }
 
   // 1. Try to find in ServiceProvider
@@ -33,6 +35,8 @@ export const loginUser = asyncHandler(async (req, res, next) => {
   }
 
   const token = generateToken(user._id, role);
+
+  user.password = undefined;
 
   // 4. Respond with token and user info
   res.status(200).json({

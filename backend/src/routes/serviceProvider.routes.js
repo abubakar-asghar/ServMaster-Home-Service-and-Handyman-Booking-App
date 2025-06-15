@@ -15,10 +15,12 @@ import {
   updatePhoneVerification,
   updateIdentityVerification,
   updateProfessionalVerification,
+  getServiceProvidersByService,
 } from "../controllers/serviceProvider.controllers.js";
 
 // import { authenticateUser } from "../middlewares/authMiddleware.js";
 import upload from "../middlewares/multerMiddleware.js";
+import { isAuthenticatedServiceProvider } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
@@ -31,13 +33,33 @@ router.post("/register", registerServiceProvider);
 // Protected Routes
 // router.use(authenticateUser);
 
-router.get("/me", getServiceProviderProfile);
-router.put("/personal-info", updatePersonalInfo);
-router.put("/business-info", updateBusinessInfo);
-router.put("/change-password", updatePassword);
-router.put("/phone-verification", updatePhoneVerification);
-router.put("/identity-verification", updateIdentityVerification);
-router.put("/professional-verification", updateProfessionalVerification);
+router.get("/me", isAuthenticatedServiceProvider, getServiceProviderProfile);
+router.put(
+  "/personal-info",
+  isAuthenticatedServiceProvider,
+  updatePersonalInfo
+);
+router.put(
+  "/business-info",
+  isAuthenticatedServiceProvider,
+  updateBusinessInfo
+);
+router.put("/change-password", isAuthenticatedServiceProvider, updatePassword);
+router.put(
+  "/phone-verification",
+  isAuthenticatedServiceProvider,
+  updatePhoneVerification
+);
+router.put(
+  "/identity-verification",
+  isAuthenticatedServiceProvider,
+  updateIdentityVerification
+);
+router.put(
+  "/professional-verification",
+  isAuthenticatedServiceProvider,
+  updateProfessionalVerification
+);
 
 router.post("/upload/work-images", upload.array("images", 5), uploadWorkImages);
 router.post(
@@ -50,9 +72,9 @@ router.post(
 );
 router.post("/upload/selfie", upload.single("selfie"), uploadSelfie);
 
-router.put("/services", addServices);
+router.put("/add-services", addServices);
 
 // Getting all ServiceProviders of specific Service ID
-router.get("/:serviceId", getServiceProviderProfile);
+router.get("/services/:serviceId", getServiceProvidersByService);
 
 export default router;
