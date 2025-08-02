@@ -11,6 +11,7 @@ export const createAdmin = async (data) => {
 };
 
 export const isAuthenticated = async () => {
+  console.log("Is Authenticating");
   const response = await axiosInstance.get("/api/admin/profile");
   return response.data;
 };

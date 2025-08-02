@@ -52,6 +52,8 @@ import star from "../assets/icons/star.png";
 import wallet from "../assets/icons/wallet.png";
 import info from "../assets/icons/info.png";
 import repairingService from "../assets/icons/repairing-service.png";
+import notFound from "../assets/icons/not-found.png";
+import message from "../assets/icons/message.png";
 
 export default {
   home,
@@ -107,4 +109,7 @@ export default {
   wallet,
   info,
   repairingService,
+  notFound,
+  support,
+  message,
 };

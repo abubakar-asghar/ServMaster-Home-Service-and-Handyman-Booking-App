@@ -6,57 +6,40 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { icons } from "../../../constants";
 import { colors } from "../../../constants/colors";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import TabHeader from "../../../components/ui/TabHeader";
 import { useGetServiceCategories } from "../../../hooks/useServices";
 import SearchBar from "../../../components/ui/SearchBar";
+import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
+import { LinearGradient } from "expo-linear-gradient";
+import { customerRoutes } from "../../../lib/routes";
 
-// const MarqueeText = ({ text, width = 150 }) => {
-//   const animatedValue = useRef(new Animated.Value(0)).current;
+const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
-//   useEffect(() => {
-//     Animated.loop(
-//       Animated.timing(animatedValue, {
-//         toValue: -width, // move left
-//         duration: 5000,
-//         easing: Easing.linear,
-//         useNativeDriver: true,
-//       })
-//     ).start();
-//   }, []);
-
-//   return (
-//     <View style={{ width, overflow: "hidden", height: 16 }}>
-//       <Animated.Text
-//         style={{
-//           transform: [{ translateX: animatedValue }],
-//           width: width * 2, // so it keeps scrolling
-//           fontSize: 12,
-//           color: "black",
-//         }}
-//         numberOfLines={1}
-//       >
-//         {text} {text}
-//       </Animated.Text>
-//     </View>
-//   );
-// };
+const SkeletonCategoryCard = () => (
+  <View className="w-[47%] mb-4 items-center">
+    <ShimmerPlaceholder
+      style={{
+        width: "100%",
+        height: 130,
+        borderRadius: 12,
+        marginBottom: 8,
+      }}
+    />
+    <ShimmerPlaceholder style={{ width: 80, height: 14, borderRadius: 6 }} />
+  </View>
+);
 
 const ServicesCategories = () => {
-  const router = useRouter();
-
   const { data, error, isPending } = useGetServiceCategories();
   const [searchValue, setSearchValue] = useState("");
-  const [categories, setCategories] = useState([]);
 
-  useEffect(() => {
-    setCategories(data?.data || []);
-  }, [data]);
+  const categories = Array.isArray(data?.data) ? data.data : [];
 
   const filteredCategories = useMemo(() => {
     if (!searchValue.trim()) return categories;
@@ -67,54 +50,69 @@ const ServicesCategories = () => {
   }, [searchValue, categories]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* Header */}
       <TabHeader title="Categories" />
 
       {/* Services Grid */}
-      <View className="flex-1 bg-white">
+      {isPending ? (
         <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingBottom: 20,
-            backgroundColor: "white",
-          }}
+          contentContainerStyle={{ backgroundColor: "white" }}
+          className="p-5"
+        >
+          <View className="mb-6">
+            <ShimmerPlaceholder
+              style={{ width: "100%", height: 56, borderRadius: 12 }}
+            />
+          </View>
+
+          <View className="flex-row flex-wrap justify-between mt-2">
+            {[...Array(6)].map((_, idx) => (
+              <SkeletonCategoryCard key={`skeleton-${idx}`} />
+            ))}
+          </View>
+        </ScrollView>
+      ) : error ? (
+        <View className="flex-1 items-center justify-center py-10">
+          <Text className="text-red-500">Failed to load categories.</Text>
+        </View>
+      ) : filteredCategories.length === 0 ? (
+        <View className="flex-1 items-center justify-center py-10">
+          <Text className="text-gray-500">No categories available.</Text>
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={{ backgroundColor: "white" }}
           scrollEnabled
           showsVerticalScrollIndicator={false}
+          className="p-5"
         >
           {/* 🔍 Search Input */}
-          <View className="mt-5">
+          <View className="mb-6">
             <SearchBar
               placeholder="Search services..."
               value={searchValue}
               onChangeText={setSearchValue}
             />
           </View>
-          
-          {isPending && (
-            <View className="flex-1 items-center justify-center">
-              <Text>Loading...</Text>
-            </View>
-          )}
-          {error && (
-            <View className="flex-1 items-center justify-center">
-              <Text>Error: {error.message}</Text>
-            </View>
-          )}
 
-          <View className="flex-row flex-wrap justify-between mt-7">
+          <View className="flex-row flex-wrap justify-between">
             {filteredCategories.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                activeOpacity={0.7}
+                activeOpacity={0.9}
                 onPress={() => {
-                  router.push(`/customer/categories/${item._id}`);
+                  router.push(customerRoutes.CUSTOMER_SERVICES(item._id));
                 }}
-                className="w-[47%] mb-4 items-center"
+                className="w-[47%] mb-4 items-center rounded-xl"
               >
-                <View className="w-full h-32 items-center justify-center bg-muted-100 p-4 rounded-md">
+                <View className="w-full h-32 items-center justify-center bg-muted-light shadow-md shadow-gray-400 p-4 rounded-xl">
                   <Image
-                    source={icons[item.slug] || icons.acRepair}
+                    source={{
+                      uri:
+                        item.icon ||
+                        "https://res.cloudinary.com/abubakarmalik/image/upload/v1751765416/mechanic_nvpheo.png",
+                    }}
                     resizeMode="contain"
                     className="w-16 h-16"
                     tintColor={colors.primary}
@@ -130,8 +128,8 @@ const ServicesCategories = () => {
             ))}
           </View>
         </ScrollView>
-      </View>
-    </SafeAreaView>
+      )}
+    </View>
   );
 };
 

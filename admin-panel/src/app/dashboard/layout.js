@@ -1,4 +1,4 @@
-import ClientWrapper from "@/components/ClientWrapper";
+import ClientWrapper from "../../components/ClientWrapper";
 
 export const metadata = {
   title: "Admin Panel - ServMaster",
@@ -7,8 +7,6 @@ export const metadata = {
 
 export default function AdminLayout({ children }) {
   return (
-    <main>
       <ClientWrapper>{children}</ClientWrapper>
-    </main>
   );
 }

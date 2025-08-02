@@ -10,6 +10,7 @@ export default function ProfileStackLayout() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack screenOptions={{ presentation: "modal" }} />
       </Stack>
     </>
   );

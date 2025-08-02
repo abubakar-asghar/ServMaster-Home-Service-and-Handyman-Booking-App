@@ -1,41 +1,35 @@
-// middleware/multer.middleware.js
-
 import multer from "multer";
 import path from "path";
-import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 
-// Define storage
+// Ensure uploads folder exists
+const uploadPath = "./public/temp";
+
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join("uploads", "service_providers");
-    fs.mkdirSync(uploadPath, { recursive: true }); // ensure directory exists
+  destination: (req, file, cb) => {
     cb(null, uploadPath);
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const uniqueName = `${uuidv4()}${ext}`;
-    cb(null, uniqueName);
+    const name = file.originalname.split(".")[0].replace(/\s+/g, "-");
+    cb(null, `${Date.now()}-${name}${ext}`);
   },
 });
 
-// File type filter
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-  if (allowedTypes.includes(file.mimetype)) {
+  if (file.mimetype.startsWith("image")) {
     cb(null, true);
   } else {
-    cb(new Error("Only .jpeg, .jpg and .png files are allowed!"), false);
+    cb(new Error("Only image files are allowed!"), false);
   }
 };
 
-// Multer configuration
 const upload = multer({
   storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB file size limit
-  },
   fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
 
 export default upload;

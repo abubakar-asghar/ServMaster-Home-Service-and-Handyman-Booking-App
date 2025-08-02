@@ -10,7 +10,7 @@ import { isAuthenticatedCustomer } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
-router.route("/").post(isAuthenticatedCustomer, createReview);
+router.route("/new").post(isAuthenticatedCustomer, createReview);
 router
   .route("/:id")
   .get(getReviewById)

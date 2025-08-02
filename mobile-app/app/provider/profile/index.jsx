@@ -1,40 +1,71 @@
 import { View, Text, Image, ScrollView } from "react-native";
 import { icons, images } from "../../../constants";
-import { colors } from "../../../constants/colors";
-import { SafeAreaView } from "react-native-safe-area-context";
 import TabHeader from "../../../components/ui/TabHeader";
 import ProfileNotificationIcon from "../../../components/profile/ProfileNotificationIcon";
 import ProfileContentHeading from "../../../components/profile/ProfileContentHeading";
 import ProfileContentLink from "../../../components/profile/ProfileContentLink";
 import ProfileLogoutBtn from "../../../components/profile/ProfileLogoutBtn";
+import { useSelector } from "react-redux";
+import { providerRoutes } from "../../../lib/routes";
 
-export default function Profile() {
+export default function ProvidersProfile() {
+  const { user } = useSelector((state) => state.auth);
+
+  if (user.role !== "ServiceProvider") return null;
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* Header */}
       <TabHeader title={"My Profile"} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="relative flex-1 bg-white">
           {/* Notifications */}
-          <ProfileNotificationIcon to={"/provider/notifications"} />
+          <ProfileNotificationIcon to={providerRoutes.PROVIDER_NOTIFICATIONS} />
 
           {/* Avatar & Name */}
           <View className="items-center pt-8 pb-4">
-            <Image source={images.step3} className="w-24 h-24 rounded-full" />
-            <Text className="mt-3 text-xl font-psemibold text-text">
-              John Doe
+            {user.profileImage ? (
+              <Image
+                source={{ uri: user.profileImage }}
+                className="w-24 h-24 rounded-full"
+              />
+            ) : (
+              <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center">
+                <FontAwesome name="user" size={36} color={colors.primary} />
+              </View>
+            )}
+            <Text className="mt-3 text-xl font-psemibold text-primary">
+              {user.fullName}
             </Text>
           </View>
 
           {/* Status */}
-          <View className="px-6 mb-6 flex-row items-center justify-center gap-2">
-            <Text className="text-sm text-muted text-center font-pregular">
+          <View className="px-6 mb-2 flex-row items-center justify-center gap-2">
+            <Text className="text-sm text-text text-center font-pregular">
               Profile Status:
             </Text>
             <Text className="text-secondary font-pmedium text-center">
-              In Process
+              {user.accountStatus === "pending"
+                ? "In Process"
+                : user.accountStatus.charAt(0).toUpperCase() +
+                  user.accountStatus.slice(1)}
             </Text>
           </View>
+
+          {/* Guide */}
+          {user.accountStatus !== "active" && (
+            <View className="px-6 mb-6 flex-row items-center justify-center gap-2">
+              <Text className="text-muted text-xs font-pregular text-center">
+                {user.accountStatus === "pending"
+                  ? "Complete your profile and submit\nthe required documents for verification."
+                  : user.accountStatus === "verified"
+                  ? "Your account has been verified.\nPlease wait while it is being activated."
+                  : user.accountStatus === "suspended"
+                  ? "Your account has been suspended.\nPlease contact support for assistance."
+                  : ""}
+              </Text>
+            </View>
+          )}
 
           {/* General Settings */}
           <ProfileContentHeading heading={"General"} />
@@ -42,26 +73,27 @@ export default function Profile() {
             {
               label: "Personal Information",
               route: "/provider/profile/general/personal-information",
+              // route: providerRoutes.PROVIDER_PERSONAL_INFO,
               icon: icons.profile,
             },
             {
               label: "Business Information",
-              route: "/provider/profile/general/business-information",
+              route: providerRoutes.PROVIDER_BUSINESS_INFO,
               icon: icons.briefcase,
             },
             {
               label: "My Services",
-              route: "/provider/profile/services",
+              route: providerRoutes.PROVIDER_SERVICES,
               icon: icons.services,
             },
-            {
-              label: "Transation History",
-              route: "/provider/profile/general/transaction-history",
-              icon: icons.transactionHistory,
-            },
+            // {
+            //   label: "Transation History",
+            //   route: "/provider/profile/general/transaction-history",
+            //   icon: icons.transactionHistory,
+            // },
             {
               label: "Change Password",
-              route: "/provider/profile/general/change-password",
+              route: providerRoutes.PROVIDER_CHANGE_PASSWORD,
               icon: icons.password,
             },
           ].map((item) => (
@@ -73,21 +105,33 @@ export default function Profile() {
           {[
             {
               label: "Phone Number",
-              route: "/provider/profile/verification/phone-verification",
+              route: providerRoutes.PROVIDER_VERIFICATION_PHONE,
               icon: icons.phoneNumber,
-              status: "Not Verified",
+              status: user?.isPhoneVerified ? "Verified" : "Not Verified",
             },
             {
               label: "Identity Verification",
-              route: "/provider/profile/verification/identity-verification",
+              route: providerRoutes.PROVIDER_VERIFICATION_IDENTITY,
               icon: icons.identity,
-              status: "Not Verified",
+              status:
+                user?.verification?.identity?.status === "pending"
+                  ? "Not Verified"
+                  : user.verification?.identity?.status
+                      .charAt(0)
+                      .toUpperCase() +
+                    user.verification?.identity?.status.slice(1),
             },
             {
               label: "Professional Verification",
-              route: "/provider/profile/verification/professional-verification",
+              route: providerRoutes.PROVIDER_VERIFICATION_PROFESSIONAL,
               icon: icons.professional,
-              status: "Not Verified",
+              status:
+                user?.verification?.professional?.status === "pending"
+                  ? "Not Verified"
+                  : user.verification?.professional?.status
+                      .charAt(0)
+                      .toUpperCase() +
+                    user.verification?.professional?.status.slice(1),
             },
           ].map((item) => (
             <ProfileContentLink key={item.label} item={item} />
@@ -114,6 +158,6 @@ export default function Profile() {
           <ProfileLogoutBtn />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -1,15 +1,14 @@
-import { setUser } from "@/store/slices/authSlice";
-import { useToast } from "./use-toast";
+import { setUser } from "../store/slices/authSlice";
 import { useDispatch } from "react-redux";
-import { adminLogin, isAuthenticated } from "@/services/authApi";
+import { adminLogin, isAuthenticated } from "../services/authApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { getToken, removeToken, setToken } from "@/lib/storage";
+import { usePathname, useRouter } from "next/navigation";
+import { getToken, removeToken, setToken } from "../lib/storage";
+import toast from "react-hot-toast";
 
 export const useAdminLogin = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { toast } = useToast();
 
   return useMutation({
     mutationKey: ["admin-login"],
@@ -17,10 +16,8 @@ export const useAdminLogin = () => {
     onSuccess: async (response) => {
       console.log(response);
       if (response) {
-        toast({
-          title: "Success",
-          description: response?.message || "You are Logged in successfully",
-        });
+        console.log(response)
+        toast.success(response?.message || "You are Logged in successfully");
         setToken(response.token);
         dispatch(
           setUser({
@@ -33,13 +30,9 @@ export const useAdminLogin = () => {
       }
     },
     onError: (error) => {
-      removeToken();
+      // removeToken();
 
-      toast({
-        title: "Oh! Something went wrong",
-        description: error?.response?.data?.message || "Error while logging in",
-        variant: "destructive",
-      });
+      toast.error(error?.response?.data?.message || "Error while logging in");
     },
   });
 };
@@ -47,7 +40,7 @@ export const useAdminLogin = () => {
 export const useIsAuthenticated = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { toast } = useToast();
+  const pathname = usePathname()
 
   return useMutation({
     mutationFn: isAuthenticated,
@@ -63,19 +56,13 @@ export const useIsAuthenticated = () => {
             token,
           })
         );
-        router.replace("/dashboard/overview");
+        router.replace(pathname);
       }
     },
     onError: (error) => {
       removeToken();
 
-      toast({
-        title: "Authentication Error",
-        description:
-          error?.response?.data?.message ||
-          "Session expired. Please login again.",
-        variant: "destructive",
-      });
+      toast.error("Session expired. Please login again.");
     },
   });
 };

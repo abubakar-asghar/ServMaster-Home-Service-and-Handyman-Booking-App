@@ -11,54 +11,59 @@ import ErrorHandler from "../utils/errorHandler.js";
  * @access Private (Customer only)
  */
 export const createReview = asyncHandler(async (req, res, next) => {
-  const { service_request_id, service_provider_id, rating, review } = req.body;
-  const customer_id = req.customer.id; // Assuming authentication middleware sets req.customer
+  const { service_request, service, service_provider, rating, comment } =
+    req.body;
+  const customer = req.customer; // Assuming authentication middleware sets req.customer
 
-  if (!service_request_id || !service_provider_id || !rating) {
+  if (!customer) {
+    return next(new ErrorHandler(404, "Customer not found"));
+  }
+
+  if (!service_request || !service_provider || !rating) {
     return next(
       new ErrorHandler(
-        "Service request ID, provider ID, and rating are required",
-        400
+        400,
+        "Service request ID, provider ID, and rating are required"
       )
     );
   }
 
   // Check if the service request exists
-  const serviceRequest = await ServiceRequest.findById(service_request_id);
+  const serviceRequest = await ServiceRequest.findById(service_request);
   if (!serviceRequest) {
-    return next(new ErrorHandler("Service request not found", 404));
-  }
-
-  // Check if the customer exists
-  const customer = await Customer.findById(customer_id);
-  if (!customer) {
-    return next(new ErrorHandler("Customer not found", 404));
+    return next(new ErrorHandler(404, "Service request not found"));
   }
 
   // Check if the service provider exists
-  const serviceProvider = await ServiceProvider.findById(service_provider_id);
+  const serviceProvider = await ServiceProvider.findById(service_provider);
   if (!serviceProvider) {
-    return next(new ErrorHandler("Service provider not found", 404));
+    return next(new ErrorHandler(404, "Service provider not found"));
   }
 
   // Prevent duplicate reviews for the same service request
   const existingReview = await Review.findOne({
-    service_request_id,
-    customer_id,
+    service_request,
+    customer: customer._id,
   });
   if (existingReview) {
     return next(
-      new ErrorHandler("You have already reviewed this service", 400)
+      new ErrorHandler(400, "You have already reviewed this service")
     );
   }
 
-  const newReview = await Review.create({
-    service_request_id,
-    customer_id,
-    service_provider_id,
+  const newReview = new Review({
+    service_request,
+    customer: customer._id,
+    service,
+    service_provider,
     rating,
-    review,
+    comment,
   });
+
+  await newReview.save();
+
+  serviceRequest.hasReview = true; // Update service request to indicate it has a review
+  await serviceRequest.save();
 
   res.status(201).json({
     success: true,
@@ -74,17 +79,16 @@ export const createReview = asyncHandler(async (req, res, next) => {
  */
 export const getServiceProviderReviews = asyncHandler(
   async (req, res, next) => {
-    const { service_provider_id } = req.params;
+    const provider = req.serviceProvider; // Assuming authentication middleware sets req.serviceProvider
 
-    const serviceProvider = await ServiceProvider.findById(service_provider_id);
+    const serviceProvider = await ServiceProvider.findById(provider._id);
     if (!serviceProvider) {
-      return next(new ErrorHandler("Service provider not found", 404));
+      return next(new ErrorHandler(404, "Service provider not found"));
     }
 
-    const reviews = await Review.find({ service_provider_id }).populate(
-      "customer_id",
-      "name"
-    );
+    const reviews = await Review.find({
+      service_provider: provider._id,
+    }).populate("customer", "fullName");
 
     res.status(200).json({
       success: true,
@@ -100,12 +104,12 @@ export const getServiceProviderReviews = asyncHandler(
  */
 export const getReviewById = asyncHandler(async (req, res, next) => {
   const review = await Review.findById(req.params.id).populate(
-    "customer_id",
-    "name"
+    "customer",
+    "fullName"
   );
 
   if (!review) {
-    return next(new ErrorHandler("Review not found", 404));
+    return next(new ErrorHandler(404, "Review not found"));
   }
 
   res.status(200).json({
@@ -120,21 +124,21 @@ export const getReviewById = asyncHandler(async (req, res, next) => {
  * @access  Private (Customer only)
  */
 export const updateReview = asyncHandler(async (req, res, next) => {
-  const { rating, review } = req.body;
-  const customer_id = req.customer.id; // Assuming authentication middleware sets req.customer
+  const { rating, comment } = req.body;
+  const customerId = req.customer.id; // Assuming authentication middleware sets req.customer
 
   let existingReview = await Review.findById(req.params.id);
   if (!existingReview) {
-    return next(new ErrorHandler("Review not found", 404));
+    return next(new ErrorHandler(404, "Review not found"));
   }
 
   // Ensure the logged-in customer is the owner of the review
-  if (existingReview.customer_id.toString() !== customer_id) {
-    return next(new ErrorHandler("You can only update your own review", 403));
+  if (existingReview.customer.toString() !== customerId) {
+    return next(new ErrorHandler(403, "You can only update your own review"));
   }
 
   existingReview.rating = rating || existingReview.rating;
-  existingReview.review = review || existingReview.review;
+  existingReview.comment = comment || existingReview.comment;
 
   await existingReview.save();
 
@@ -151,19 +155,25 @@ export const updateReview = asyncHandler(async (req, res, next) => {
  * @access  Private (Customer only)
  */
 export const deleteReview = asyncHandler(async (req, res, next) => {
-  const customer_id = req.customer.id; // Assuming authentication middleware sets req.customer
+  const customerId = req.customer.id; // Assuming authentication middleware sets req.customer
 
   const review = await Review.findById(req.params.id);
   if (!review) {
-    return next(new ErrorHandler("Review not found", 404));
+    return next(new ErrorHandler(404, "Review not found"));
   }
 
   // Ensure the logged-in customer is the owner of the review
-  if (review.customer_id.toString() !== customer_id) {
-    return next(new ErrorHandler("You can only delete your own review", 403));
+  if (review.customer.toString() !== customerId) {
+    return next(new ErrorHandler(403, "You can only delete your own review"));
   }
 
   await review.deleteOne();
+
+  const serviceRequest = await ServiceRequest.findById(review.service_request);
+  if (serviceRequest) {
+    serviceRequest.hasReview = false;
+    await serviceRequest.save();
+  }
 
   res.status(200).json({
     success: true,

@@ -1,5 +1,4 @@
-import { View, Text, Image, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { icons, images } from "../../../constants";
 import { colors } from "../../../constants/colors";
 import TabHeader from "../../../components/ui/TabHeader";
@@ -7,10 +6,18 @@ import ProfileNotificationIcon from "../../../components/profile/ProfileNotifica
 import ProfileContentHeading from "../../../components/profile/ProfileContentHeading";
 import ProfileContentLink from "../../../components/profile/ProfileContentLink";
 import ProfileLogoutBtn from "../../../components/profile/ProfileLogoutBtn";
+import { useSelector } from "react-redux";
+import { customerRoutes } from "../../../lib/routes";
+import { router } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function CustomerProfileTab() {
+  const { user } = useSelector((state) => state.auth);
+
+  if (user.role !== "Customer") return null;
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* Header */}
       <TabHeader title="My Profile" />
 
@@ -24,12 +31,29 @@ export default function CustomerProfileTab() {
 
           {/* Avatar and Name */}
           <View className="items-center pt-8 pb-4 mb-5">
-            <Image source={images.step3} className="w-24 h-24 rounded-full" />
+            <View className="relative">
+              {user.profileImage ? (
+                <Image
+                  source={{ uri: user.profileImage }}
+                  className="w-24 h-24 rounded-full"
+                />
+              ) : (
+                <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center">
+                  <FontAwesome name="user" size={36} color={colors.primary} />
+                </View>
+              )}
+              <TouchableOpacity
+                className="absolute bottom-0 right-0 bg-primary rounded-full p-2"
+                onPress={() => router.push("/customer/profile/personal")}
+              >
+                <FontAwesome name="pencil" size={16} color="white" />
+              </TouchableOpacity>
+            </View>
             <Text className="mt-3 text-xl font-psemibold text-text">
-              John Doe
+              {user.fullName}
             </Text>
             <Text className="text-text text-sm font-pregular">
-              abubakarmalik2949@gmail.com
+              Phone No. {user.phone}
             </Text>
           </View>
 
@@ -46,16 +70,18 @@ export default function CustomerProfileTab() {
             {
               icon: icons.favorite,
               label: "Favorite Services",
-              route: "route2",
+              route: customerRoutes.CUSTOMER_FAVORITE_SERVICES,
             },
             {
               icon: icons.favorite,
               label: "Favorite Providers",
-              route: "route3",
+              route: customerRoutes.CUSTOMER_FAVORITE_PROVIDERS,
             },
-            // { icon: icons.terms, label: "Blogs", route: "route4" },
-            // { icon: icons.star, label: "Rate Us", route: "route5" },
-            { icon: icons.star, label: "My Reviews", route: "route6" },
+            {
+              icon: icons.star,
+              label: "My Reviews",
+              route: customerRoutes.CUSTOMER_REVIEWS,
+            },
           ].map((item) => (
             <ProfileContentLink key={item.label} item={item} />
           ))}
@@ -86,6 +112,6 @@ export default function CustomerProfileTab() {
           <ProfileLogoutBtn />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

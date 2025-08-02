@@ -1,5 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { loginUser } from "../api/services/authApi";
+import {
+  loginUser,
+  resendVerificationCode,
+  verifyUserPhone,
+} from "../api/services/authApi";
 import { Alert } from "react-native";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../store/slices/authSlice";
@@ -12,27 +16,62 @@ export const useLoginUser = () => {
   return useMutation({
     mutationFn: loginUser,
     mutationKey: ["login-user"],
-    onSuccess: async (response) => {
+    onSuccess: (response) => {
       const userData = {
-        user: response?.data,
-        token: response?.token,
-        role: response?.role,
+        user: response.data,
+        token: response.token,
       };
-      dispatch(setCredentials(userData));
-      await saveUserToStorage(userData);
+      const storageData = {
+        role: response.data?.role,
+        token: response.token,
+      };
 
-      if (userData.role === "service-provider") {
+      dispatch(setCredentials(userData));
+      saveUserToStorage(storageData);
+
+      if (response.data.role === "ServiceProvider") {
         router.replace("/provider/home");
-      } else if (userData.role === "customer") {
-        router.replace("/customer/home");
       } else {
-        Alert.alert("Login Error", "Invalid user role.");
+        router.replace("/customer/home");
       }
 
-      Alert.alert("User logged in successfully", response?.message);
+      Alert.alert("Success", response.message);
     },
     onError: (error) => {
-      Alert.alert("Error while logging in user", error?.message);
+      if (
+        error.response?.status === 403 &&
+        error.response.data.message.includes("Verification code sent")
+      ) {
+        // Extract phone number from the request
+        const phone = JSON.parse(error.config.data).phone;
+
+        // Redirect to OTP verification with phone number
+        router.push({
+          pathname: "/auth/verify-otp",
+          params: {
+            phone: phone,
+            from: "login",
+            message: error.response.data.message,
+          },
+        });
+      } else {
+        Alert.alert(
+          "Error",
+          error.response?.data?.message || "Login failed. Please try again."
+        );
+      }
     },
+  });
+};
+
+export const useVerifyUserPhone = () => {
+  return useMutation({
+    mutationFn: verifyUserPhone,
+  });
+};
+
+export const useResendVerification = () => {
+  return useMutation({
+    mutationFn: resendVerificationCode,
   });
 };

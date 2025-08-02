@@ -11,12 +11,12 @@ export const createServiceCategory = asyncHandler(async (req, res, next) => {
   const { name, description, icon } = req.body;
 
   if (!name) {
-    return next(new ErrorHandler("Service category name is required", 400));
+    return next(new ErrorHandler(400, "Service category name is required"));
   }
 
   const existingCategory = await ServiceCategory.findOne({ name });
   if (existingCategory) {
-    return next(new ErrorHandler("Service category already exists", 400));
+    return next(new ErrorHandler(400, "Service category already exists"));
   }
 
   const category = await ServiceCategory.create({ name, description, icon });
@@ -38,7 +38,7 @@ export const getAllServiceCategories = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Service categories fetched successfully",
-    data: categories
+    data: categories,
   });
 });
 
@@ -50,7 +50,7 @@ export const getAllServiceCategories = asyncHandler(async (req, res, next) => {
 export const getServiceCategoryById = asyncHandler(async (req, res, next) => {
   const category = await ServiceCategory.findById(req.params.id);
   if (!category) {
-    return next(new ErrorHandler("Service category not found", 404));
+    return next(new ErrorHandler(404, "Service category not found"));
   }
 
   res.status(200).json({
@@ -69,7 +69,7 @@ export const updateServiceCategory = asyncHandler(async (req, res, next) => {
   let category = await ServiceCategory.findById(req.params.id);
 
   if (!category) {
-    return next(new ErrorHandler("Service category not found", 404));
+    return next(new ErrorHandler(404, "Service category not found"));
   }
 
   category.name = name || category.name;
@@ -93,7 +93,7 @@ export const updateServiceCategory = asyncHandler(async (req, res, next) => {
 export const deleteServiceCategory = asyncHandler(async (req, res, next) => {
   const category = await ServiceCategory.findById(req.params.id);
   if (!category) {
-    return next(new ErrorHandler("Service category not found", 404));
+    return next(new ErrorHandler(404, "Service category not found"));
   }
 
   await category.deleteOne();

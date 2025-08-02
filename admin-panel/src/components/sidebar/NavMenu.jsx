@@ -7,7 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "../../components/ui/sidebar";
 import Link from "next/link";
 
 export const NavMenu = ({ item }) => {

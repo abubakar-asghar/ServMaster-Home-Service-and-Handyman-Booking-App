@@ -1,22 +1,21 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomButton from "../../components/ui/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { customerRoutes, providerRoutes } from "../../lib/routes";
 
 export default function SelectRole() {
-  const router = useRouter();
-
   const handleSelection = async (role) => {
     try {
       await AsyncStorage.setItem("onboarding_done", "true");
       await AsyncStorage.setItem("user_role", role);
 
-      if (role === "customer") {
-        router.push("/auth/customer-register");
-      } else if (role === "provider") {
-        router.push("/auth/provider-register");
+      if (role === "Customer") {
+        router.push(customerRoutes.CUSTOMER_REGISTER);
+      } else if (role === "ServiceProvider") {
+        router.push(providerRoutes.PROVIDER_REGISTER);
       }
     } catch (error) {
       console.error("Error saving role:", error);
@@ -39,14 +38,14 @@ export default function SelectRole() {
 
       <CustomButton
         title="Customer"
-        handlePress={() => handleSelection("customer")}
+        handlePress={() => handleSelection("Customer")}
         textStyles="text-white"
         containerStyles="bg-primary w-[300px]"
       />
 
       <CustomButton
         title="Service Provider"
-        handlePress={() => handleSelection("provider")}
+        handlePress={() => handleSelection("ServiceProvider")}
         textStyles="text-white"
         containerStyles="bg-primary w-[300px] mt-4"
       />

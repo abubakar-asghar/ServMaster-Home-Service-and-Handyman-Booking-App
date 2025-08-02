@@ -11,15 +11,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/layout.js"
     ],
-    "/dashboard/overview/page": [
+    "/dashboard/service-providers/detail/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/overview/page.js"
+      "static/chunks/app/dashboard/service-providers/detail/page.js"
     ],
-    "/dashboard/statistics/page": [
+    "/dashboard/service-providers/all/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/statistics/page.js"
+      "static/chunks/app/dashboard/service-providers/all/page.js"
+    ],
+    "/_not-found/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

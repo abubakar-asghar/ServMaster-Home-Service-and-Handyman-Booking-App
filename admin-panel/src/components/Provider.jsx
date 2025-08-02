@@ -1,7 +1,7 @@
 "use client";
 
-import queryClient from "@/api/queryClient";
-import store from "@/store/store";
+import queryClient from "../api/queryClient";
+import store from "../store/store";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { Provider as ReduxProvider } from "react-redux";

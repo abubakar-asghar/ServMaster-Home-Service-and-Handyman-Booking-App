@@ -6,14 +6,17 @@ import {
   ScrollView,
   Dimensions,
   Image,
+  Alert,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link, router } from "expo-router";
 import FormField from "../../components/ui/FormField";
 import CustomButton from "../../components/ui/CustomButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { icons, images } from "../../constants";
 import Checkbox from "expo-checkbox";
 import { useRegisterCustomer } from "../../hooks/useCustomer";
+import { colors } from "../../constants/colors";
+import { commonRoutes } from "../../lib/routes";
 
 const ErrorText = ({ error }) => {
   return (
@@ -24,8 +27,6 @@ const ErrorText = ({ error }) => {
 };
 
 const CustomerRegister = () => {
-  const router = useRouter();
-
   const [errors, setErrors] = useState({});
   const [agree, setAgree] = useState(false);
 
@@ -79,23 +80,18 @@ const CustomerRegister = () => {
   const handleRegister = async () => {
     if (!validateForm()) return;
 
-    if (form.password !== form.confirmPassword) {
-      Alert.alert("Passwords do not match.");
-      return;
-    }
-
     try {
       const response = await registerCustomer(form);
 
       if (response.success) {
-        router.push("/auth/login");
-      } else {
-        console.log(
-          response.message || "Registration failed. Please try again."
-        );
+        // Redirect to OTP verification with phone number
+        router.push({
+          pathname: "/auth/verify-otp",
+          params: { phone: form.phone },
+        });
       }
     } catch (error) {
-      console.log("An error occurred. Please try again.");
+      Alert.alert("Error", "An error occurred. Please try again.");
     }
   };
 
@@ -167,7 +163,7 @@ const CustomerRegister = () => {
             <Checkbox
               value={agree}
               onValueChange={setAgree}
-              color={agree ? "#007bff" : undefined}
+              color={agree ? colors.primary : undefined}
             />
             <Text className="text-md text-muted font-pregular px-4">
               I agree to the{" "}

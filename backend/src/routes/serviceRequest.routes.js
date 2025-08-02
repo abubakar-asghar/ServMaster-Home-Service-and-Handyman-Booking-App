@@ -5,9 +5,14 @@ import {
   getProviderRequests,
   updateServiceRequestStatus,
   deleteServiceRequest,
-  getBookingDetails
+  getBookingDetails,
+  cancelBookingByCustomer,
 } from "../controllers/serviceRequest.controllers.js";
-import { isAuthenticatedCustomer, isAuthenticatedServiceProvider, isAuthenticatedUser } from "../middlewares/authMiddleware.js";
+import {
+  isAuthenticatedCustomer,
+  isAuthenticatedServiceProvider,
+  isAuthenticatedUser,
+} from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
@@ -21,12 +26,23 @@ router.get("/customer", isAuthenticatedCustomer, getCustomerRequests);
 router.get("/provider", isAuthenticatedServiceProvider, getProviderRequests);
 
 // Get service request detail of a customer
-router.get("/:id", isAuthenticatedUser, getBookingDetails)
+router.get("/details/:id", isAuthenticatedUser, getBookingDetails);
 
 // Service provider updates the request status
-router.put("/:id", isAuthenticatedServiceProvider, updateServiceRequestStatus);
+router.put(
+  "/update-status/:id",
+  isAuthenticatedServiceProvider,
+  updateServiceRequestStatus
+);
 
 // Customer deletes a service request
-router.delete("/:id", isAuthenticatedCustomer, deleteServiceRequest);
+router.delete("/delete/:id", isAuthenticatedCustomer, deleteServiceRequest);
+
+// Customer cancels a service request
+router.put(
+  "/customer/cancel/:id",
+  isAuthenticatedCustomer,
+  cancelBookingByCustomer
+);
 
 export default router;

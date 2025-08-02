@@ -26,7 +26,7 @@ import {
   SidebarContent,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "../../components/ui/sidebar";
 import { NavAdministrative } from "./NavAdministrative";
 import { NavMenu } from "./NavMenu";
 
@@ -65,12 +65,12 @@ const items = {
       icon: UserRoundCog,
       items: [
         {
-          title: "Verify Service Providers",
-          url: "/dashboard/service-providers/verify",
-        },
-        {
           title: "View All Service Providers",
           url: "/dashboard/service-providers/all",
+        },
+        {
+          title: "Verify Service Providers",
+          url: "/dashboard/service-providers/verify",
         },
         {
           title: "Block/Unblock Providers",
@@ -118,11 +118,11 @@ const items = {
       items: [
         {
           title: "Manage Service Categories",
-          url: "/dashboard/services/categories",
+          url: "/dashboard/service-categories",
         },
         {
-          title: "Manage Subservices",
-          url: "/dashboard/services/sub-services",
+          title: "Manage Services",
+          url: "/dashboard/services",
         },
       ],
     },

@@ -2,11 +2,9 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
 import { icons } from "../../constants";
 import { colors } from "../../constants/colors";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 
 const ProfileNotificationIcon = ({to}) => {
-  const router = useRouter();
-
   return (
     <TouchableOpacity
       className="absolute top-5 right-5 p-3 bg-white rounded-full shadow-lg border border-primary"

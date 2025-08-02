@@ -1,6 +1,7 @@
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
-import Provider from "@/components/Provider";
+import { Inter } from "next/font/google";
+import Provider from "../components/Provider";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "ServMaster",
@@ -12,8 +13,17 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Provider>
-          <main>{children}</main>
-          <Toaster />
+          {children}
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 5000,
+              style: {
+                background: "#363636",
+                color: "#fff",
+              },
+            }}
+          />
         </Provider>
       </body>
     </html>

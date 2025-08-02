@@ -1,117 +1,224 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
-  ScrollView,
   TouchableOpacity,
   Image,
   KeyboardAvoidingView,
   Platform,
+  FlatList,
+  SafeAreaView,
+  Keyboard,
+  Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { icons, images } from "../../../constants";
+import { icons } from "../../../constants";
 import TabHeader from "../../../components/ui/TabHeader";
-
-const dummyMessages = [
-  { id: "1", fromMe: false, text: "Hi! I saw your booking.", time: "10:00 AM" },
-  {
-    id: "2",
-    fromMe: true,
-    text: "Yes, I need AC servicing.",
-    time: "10:01 AM",
-  },
-  {
-    id: "3",
-    fromMe: false,
-    text: "Sure. Can I come around 12?",
-    time: "10:02 AM",
-  },
-  {
-    id: "4",
-    fromMe: true,
-    text: "Yes, that works. Thank you!",
-    time: "10:03 AM",
-  },
-];
+import { useLocalSearchParams } from "expo-router";
+import { useSelector } from "react-redux";
+import {
+  useGetChatMessages,
+  useSendMessage,
+  useSendMessageWithSocket,
+} from "../../../hooks/useChat";
+import MessagesSkeleton from "../../../components/skeletons/chat/MessagesSkeleton";
+import { useChatStore } from "../../../zustand/chatStore";
+import { socket } from "../../../utils/socket"; // ✅ socket import
 
 const MessagesScreen = () => {
+  const { chatId } = useLocalSearchParams();
+  const { user } = useSelector((state) => state.auth);
   const [message, setMessage] = useState("");
+  const flatListRef = useRef(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
-    console.log("Send message:", message);
-    setMessage("");
+  const { messages, setMessages, addMessage } = useChatStore();
+
+  const {
+    data,
+    isPending: isLoadingMessages,
+    error,
+  } = useGetChatMessages(chatId);
+
+  useEffect(() => {
+    if (data?.data) {
+      setMessages(data.data); // ✅ this is missing
+    }
+  }, [data]);
+
+  // const { mutateAsync: sendMessage, isPending: isSending } = useSendMessage();
+  const { mutateAsync: sendMessageWithSocket, isPending: isSending } =
+    useSendMessageWithSocket();
+
+  // ✅ Socket: join room and listen for new messages
+  useEffect(() => {
+    if (!chatId) return;
+
+    socket.emit("joinChat", chatId);
+
+    const handleNewMessage = (newMessage) => {
+      if (newMessage.chat === chatId) {
+        addMessage(newMessage);
+      }
+    };
+
+    socket.on("newMessage", handleNewMessage);
+
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+    };
+  }, [chatId]);
+
+  // ✅ Scroll to bottom on messages update
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [messages, keyboardHeight]);
+
+  // ✅ Keyboard listener for marginBottom
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  const handleSend = async () => {
+    if (!message.trim() || isSending) return;
+
+    const payload = {
+      chatId,
+      content: { text: message.trim() },
+    };
+
+    try {
+      await sendMessageWithSocket(payload); // will trigger socket emit on backend and local addMessage
+      setMessage("");
+    } catch (error) {
+      Alert.alert("Error", error?.message || "Failed to send message");
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    if (!item?._id) return null;
+
+    const fromMe =
+      item?.sender === user?._id || item?.sender?._id === user?._id;
+
+    return (
+      <View
+        className={`max-w-[75%] mb-3 px-4 py-2 rounded-b-2xl ${
+          fromMe
+            ? "self-end bg-primary rounded-tl-2xl"
+            : "self-start bg-muted-100 rounded-tr-2xl"
+        }`}
+      >
+        <Text
+          className={`text-sm font-pmedium ${
+            fromMe ? "text-white" : "text-text"
+          }`}
+        >
+          {item?.text || ""}
+        </Text>
+        <Text
+          className={`text-xs mt-1 self-end ${
+            fromMe ? "text-white/70" : "text-muted"
+          }`}
+        >
+          {item?.createdAt
+            ? new Date(item.createdAt)
+                .toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .toUpperCase()
+            : ""}
+        </Text>
+      </View>
+    );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <TabHeader title="Provider Name" goBack />
+      <TabHeader title="Chat" goBack />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        style={{ flex: 1 }}
       >
-        <ScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
-          showsVerticalScrollIndicator={false}
+        <View style={{ flex: 1 }}>
+          {isLoadingMessages ? (
+            <MessagesSkeleton />
+          ) : error ? (
+            <View className="flex-1 justify-center items-center">
+              <Text className="text-red-500 text-center px-5">
+                Failed to load messages.
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              keyExtractor={(item) => item?._id}
+              renderItem={renderItem}
+              contentContainerStyle={{ padding: 16 }}
+              showsVerticalScrollIndicator={false}
+              onContentSizeChange={() =>
+                flatListRef.current?.scrollToEnd({ animated: true })
+              }
+              onLayout={() =>
+                flatListRef.current?.scrollToEnd({ animated: true })
+              }
+            />
+          )}
+        </View>
+
+        {/* ✅ Message input */}
+        <View
+          className="bg-white p-4 border-t border-gray-200"
+          style={{
+            marginBottom: keyboardHeight
+              ? Math.max(0, keyboardHeight - (Platform.OS === "ios" ? 30 : 0))
+              : 0,
+          }}
         >
-          {dummyMessages.map((msg) => (
-            <View
-              key={msg.id}
-              className={`max-w-[75%] mb-3 px-4 py-2 rounded-b-2xl ${
-                msg.fromMe
-                  ? "self-end bg-primary rounded-tl-2xl"
-                  : "self-start bg-muted-100 rounded-tr-2xl"
-              }`}
-            >
-              <Text
-                className={`text-sm font-pmedium max-w-[80%] ${
-                  msg.fromMe ? "text-white" : "text-text"
-                }`}
-              >
-                {msg.text}
-              </Text>
-              <Text
-                className={`text-xs mt-1 self-end max-w-[80%] ${
-                  msg.fromMe ? "text-white/70" : "text-muted"
-                }`}
-              >
-                {msg.time}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
-
-        {/* Input + File Upload */}
-        <View className="absolute bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200">
-          <View className="flex-row items-center space-x-3 gap-1 ">
+          <View className="flex-row items-center space-x-3 gap-1">
             <View className="flex-row flex-1 items-center bg-muted-100 rounded-xl">
-            {/* Message Input */}
-            <View className="flex-1 px-4 py-2">
-              <TextInput
-                value={message}
-                onChangeText={setMessage}
-                placeholder="Type your message..."
-                placeholderTextColor="#9CA3AF"
-                className="text-base font-pregular text-text"
-                multiline
-              />
+              <View className="flex-1 px-4 py-2">
+                <TextInput
+                  value={message}
+                  onChangeText={setMessage}
+                  placeholder="Type your message..."
+                  placeholderTextColor="#9CA3AF"
+                  className="text-base font-pregular text-text"
+                  multiline
+                  editable={!isLoadingMessages}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => console.log("Attach file")}
+                className="p-4"
+                disabled={isLoadingMessages}
+              >
+                <Image
+                  source={icons.attach}
+                  className="w-7 h-7"
+                  tintColor="#6B7280"
+                />
+              </TouchableOpacity>
             </View>
-            {/* Attachment Button */}
-            <TouchableOpacity
-              onPress={() => console.log("Attach File")}
-              className="p-4"
-            >
-              <Image
-                source={icons.attach}
-                className="w-7 h-7"
-                tintColor="#6B7280"
-              />
-            </TouchableOpacity>
-            </View>
-
-            {/* Send Button */}
             <TouchableOpacity
               onPress={handleSend}
               className="p-4 rounded-2xl bg-primary"

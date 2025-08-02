@@ -2,22 +2,22 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/lib/validations";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { useAdminLogin } from "@/hooks/useAuth";
+import { loginSchema } from "../../lib/validations";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Label } from "../../components/ui/label";
+import { useAdminLogin } from "../../hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getToken } from "@/lib/storage";
-import { Spinner } from "@/components/ui/spinner";
+import { getToken } from "../../lib/storage";
+import { Spinner } from "../../components/ui/spinner";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
+} from "../../components/ui/form";
 import Link from "next/link";
 import { Eye, EyeOff, GalleryVerticalEnd, Loader2 } from "lucide-react";
 
@@ -38,7 +38,6 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     try {
       await adminLogin(data);
-      router.replace("/admin/dashboard");
     } catch (error) {
       console.error("Login failed", error);
     }
@@ -47,7 +46,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token = getToken();
     if (token) {
-      router.replace("/admin/dashboard");
+      router.replace("/dashboard/overview");
     } else {
       setCheckingAuth(false);
     }
@@ -93,7 +92,9 @@ export default function LoginPage() {
                     <FormItem>
                       <FormControl>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor="email" className="font-semibold">Email</Label>
+                          <Label htmlFor="email" className="font-semibold">
+                            Email
+                          </Label>
                           <Input
                             {...field}
                             id="email"
@@ -117,7 +118,9 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center">
-                            <Label htmlFor="password" className="font-semibold">Password</Label>
+                            <Label htmlFor="password" className="font-semibold">
+                              Password
+                            </Label>
                             <Link
                               href="/forgot-password"
                               className="ml-auto text-sm underline-offset-4 hover:underline"

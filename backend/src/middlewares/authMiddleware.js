@@ -9,25 +9,30 @@ export const isAuthenticatedUser = asyncHandler(async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
 
   if (!token) {
-    return next(new ErrorHandler("Access Denied! No token provided.", 401));
+    return next(new ErrorHandler(401, "Access Denied! No token provided."));
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (decoded.role === "service-provider") {
-      req.user = await ServiceProvider.findById(decoded.id).select("-password");
-    } else if (decoded.role === "customer") {
-      req.user = await Customer.findById(decoded.id).select("-password");
+    // Check if this is a temporary token
+    if (decoded.isTemporary && req.path !== "/verify") {
+      return next(new ErrorHandler(403, "Complete verification first"));
+    }
+
+    if (decoded.role === "ServiceProvider") {
+      req.user = await ServiceProvider.findById(decoded.id);
+    } else if (decoded.role === "Customer") {
+      req.user = await Customer.findById(decoded.id);
     }
 
     if (!req.user) {
-      return next(new ErrorHandler("Customer not found!", 404));
+      return next(new ErrorHandler(404, "Customer not found!"));
     }
 
     next();
   } catch (error) {
-    return next(new ErrorHandler("Invalid or Expired Token!", 401));
+    return next(new ErrorHandler(401, "Invalid or Expired Token!"));
   }
 });
 
@@ -36,20 +41,26 @@ export const isAuthenticatedCustomer = asyncHandler(async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
 
   if (!token) {
-    return next(new ErrorHandler("Access Denied! No token provided.", 401));
+    return next(new ErrorHandler(401, "Access Denied! No token provided."));
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
-    req.customer = await Customer.findById(decoded.id).select("-password"); // Attach customer to request
+
+    // Check if this is a temporary token
+    if (decoded.isTemporary && req.path !== "/verify") {
+      return next(new ErrorHandler(403, "Complete verification first"));
+    }
+
+    req.customer = await Customer.findById(decoded.id); // Attach customer to request
 
     if (!req.customer) {
-      return next(new ErrorHandler("Customer not found!", 404));
+      return next(new ErrorHandler(404, "Customer not found!"));
     }
 
     next();
   } catch (error) {
-    return next(new ErrorHandler("Invalid or Expired Token!", 401));
+    return next(new ErrorHandler(401, "Invalid or Expired Token!"));
   }
 });
 
@@ -59,22 +70,27 @@ export const isAuthenticatedServiceProvider = asyncHandler(
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      return next(new ErrorHandler("Access Denied! No token provided.", 401));
+      return next(new ErrorHandler(401, "Access Denied! No token provided."));
     }
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.serviceProvider = await ServiceProvider.findById(decoded.id).select(
-        "-password"
-      );
 
-      if (!req.serviceProvider) {
-        return next(new ErrorHandler("Service provider not found!", 404));
+      // Check if this is a temporary token
+      if (decoded.isTemporary && req.path !== "/verify") {
+        return next(new ErrorHandler(403, "Complete verification first"));
       }
 
+      const provider = await ServiceProvider.findById(decoded.id);
+
+      if (!provider) {
+        return next(new ErrorHandler(404, "Service provider not found!"));
+      }
+
+      req.serviceProvider = provider;
       next();
     } catch (error) {
-      return next(new ErrorHandler("Invalid or Expired Token!", 401));
+      return next(new ErrorHandler(401, "Invalid or Expired Token!"));
     }
   }
 );
@@ -84,28 +100,28 @@ export const isAuthenticatedAdmin = asyncHandler(async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return next(new ErrorHandler("Access Denied! No token provided.", 401));
+    return next(new ErrorHandler(401, "Access Denied! No token provided."));
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.admin = await Admin.findById(decoded.id).select("-password");
+    req.admin = await Admin.findById(decoded.id);
 
     if (!req.admin) {
-      return next(new ErrorHandler("Admin not found!", 404));
+      return next(new ErrorHandler(404, "Admin not found!"));
     }
 
     next();
   } catch (error) {
-    return next(new ErrorHandler("Invalid or Expired Token!", 401));
+    return next(new ErrorHandler(401, "Invalid or Expired Token!"));
   }
 });
 
 // Middleware to Check if Admin is Super Admin
 export const isSuperAdmin = (req, res, next) => {
-  if (req.admin.role !== "super_admin") {
-    return next(new ErrorHandler("Access denied! Super Admins only.", 403));
+  if (req.admin.role !== "SuperAdmin") {
+    return next(new ErrorHandler(403, "Access denied! Super Admins only."));
   }
   next();
 };

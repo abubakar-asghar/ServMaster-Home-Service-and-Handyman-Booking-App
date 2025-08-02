@@ -1,21 +1,22 @@
-// routes/serviceProvider.routes.js
-
 import { Router } from "express";
 import {
-  registerServiceProvider,
   updatePersonalInfo,
   updateBusinessInfo,
   updatePassword,
   uploadWorkImages,
   getServiceProviderProfile,
-  uploadCNICImages,
-  uploadSelfie,
+  uploadIdentityDocuments,
   addServices,
+  deleteService,
+  updateService,
   getAllServiceProviders,
   updatePhoneVerification,
-  updateIdentityVerification,
   updateProfessionalVerification,
   getServiceProvidersByService,
+  getServiceProviderProfileForCustomer,
+  getProviderDashboardStats,
+  getBookedTimeSlots,
+  getServiceDetails
 } from "../controllers/serviceProvider.controllers.js";
 
 // import { authenticateUser } from "../middlewares/authMiddleware.js";
@@ -26,10 +27,14 @@ const router = Router();
 
 // Admin/Management Route
 router.get("/all", getAllServiceProviders);
-
-// Public Route
-router.post("/register", registerServiceProvider);
-
+// Getting all ServiceProviders of specific Service ID
+router.get("/all/:serviceId", getServiceProvidersByService);
+// Get Service Provider Stats dashboard page (Home Page)
+router.get(
+  "/dashboard",
+  isAuthenticatedServiceProvider,
+  getProviderDashboardStats
+);
 // Protected Routes
 // router.use(authenticateUser);
 
@@ -42,6 +47,7 @@ router.put(
 router.put(
   "/business-info",
   isAuthenticatedServiceProvider,
+  upload.single("profileImage"),
   updateBusinessInfo
 );
 router.put("/change-password", isAuthenticatedServiceProvider, updatePassword);
@@ -51,30 +57,38 @@ router.put(
   updatePhoneVerification
 );
 router.put(
-  "/identity-verification",
-  isAuthenticatedServiceProvider,
-  updateIdentityVerification
-);
-router.put(
   "/professional-verification",
   isAuthenticatedServiceProvider,
   updateProfessionalVerification
 );
 
 router.post("/upload/work-images", upload.array("images", 5), uploadWorkImages);
-router.post(
-  "/upload/cnic",
+router.put(
+  "/identity-verification",
+  isAuthenticatedServiceProvider,
   upload.fields([
+    { name: "selfie", maxCount: 1 },
     { name: "cnicFront", maxCount: 1 },
     { name: "cnicBack", maxCount: 1 },
   ]),
-  uploadCNICImages
+  uploadIdentityDocuments
 );
-router.post("/upload/selfie", upload.single("selfie"), uploadSelfie);
 
-router.put("/add-services", addServices);
+router.post("/add-services", isAuthenticatedServiceProvider, addServices);
+router.get("/service-detail/:serviceId", isAuthenticatedServiceProvider, getServiceDetails)
+router.delete(
+  "/services/:serviceId",
+  isAuthenticatedServiceProvider,
+  deleteService
+);
+router.put(
+  "/services/:serviceId",
+  isAuthenticatedServiceProvider,
+  updateService
+);
 
-// Getting all ServiceProviders of specific Service ID
-router.get("/services/:serviceId", getServiceProvidersByService);
+router.get("/booked-time-slots/:id", getBookedTimeSlots);
+
+router.get("/profile/:id", getServiceProviderProfileForCustomer);
 
 export default router;

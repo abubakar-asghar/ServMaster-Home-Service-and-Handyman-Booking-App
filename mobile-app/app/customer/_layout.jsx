@@ -4,6 +4,8 @@ import { icons } from "../../constants";
 import { colors } from "../../constants/colors";
 import { StatusBar } from "expo-status-bar";
 import ProtectedRoute from "../../components/protection/ProtectedRoutes";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
 const screenWidth = Dimensions.get("window").width;
 const tabCount = 5;
@@ -57,51 +59,64 @@ const CustomerTabsLayout = () => {
     pathname.includes("bookings/");
 
   return (
-    <>
-      <ProtectedRoute>
-        <Tabs
-          screenOptions={{
-            headerShown: false,
-            tabBarShowLabel: false,
-            tabBarActiveTintColor: " black",
-            tabBarInactiveTintColor: colors.mutedForeground,
-            tabBarStyle: {
-              display: hide ? "none" : "flex",
-              backgroundColor: colors.mutedLight,
-              borderTopWidth: 1,
-              borderTopColor: colors.muted,
-              borderColor: "transparent",
-              shadowColor: "white",
-              height: 80,
-              alignItems: "flex-start",
-              paddingTop: 15,
-              paddingBottom: 10,
-            },
-          }}
-        >
-          {tabScreens.map((tab, index) => (
-            <Tabs.Screen
-              key={tab.name}
-              name={tab.name}
-              options={{
-                title: tab.label,
-                headerShown: false,
-                tabBarIcon: ({ color, focused }) => (
-                  <TabIcon
-                    icon={tab.icon}
-                    color={color}
-                    name={tab.label}
-                    focused={focused}
-                  />
-                ),
-              }}
-            />
-          ))}
-        </Tabs>
-      </ProtectedRoute>
+    <View style={{ flex: 1, backgroundColor: colors.primary }}>
+      <LinearGradient
+        colors={[
+          colors.primary,
+          colors.primary,
+          colors.primary,
+          colors.mutedLight,
+          colors.mutedLight,
+          colors.mutedLight,
+        ]}
+        style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }}
+      />
+      <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
+        <ProtectedRoute>
+          <Tabs
+            screenOptions={{
+              headerShown: false,
+              tabBarShowLabel: false,
+              tabBarActiveTintColor: " black",
+              tabBarInactiveTintColor: colors.mutedForeground,
+              tabBarStyle: {
+                display: hide ? "none" : "flex",
+                backgroundColor: colors.mutedLight,
+                borderTopWidth: 1,
+                borderTopColor: colors.muted,
+                borderColor: "transparent",
+                shadowColor: "white",
+                height: 70,
+                alignItems: "flex-start",
+                paddingTop: 15,
+                paddingBottom: 10,
+              },
+            }}
+          >
+            {tabScreens.map((tab, index) => (
+              <Tabs.Screen
+                key={tab.name + index}
+                name={tab.name}
+                options={{
+                  title: tab.label,
+                  headerShown: false,
+                  tabBarIcon: ({ color, focused }) => (
+                    <TabIcon
+                      icon={tab.icon}
+                      color={color}
+                      name={tab.label}
+                      focused={focused}
+                    />
+                  ),
+                }}
+              />
+            ))}
+          </Tabs>
+        </ProtectedRoute>
+      </SafeAreaView>
 
-      <StatusBar backgroundColor={colors.primary} style="light" />
-    </>
+      <StatusBar style="light" />
+    </View>
   );
 };
 

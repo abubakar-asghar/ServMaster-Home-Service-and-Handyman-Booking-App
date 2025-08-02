@@ -12,6 +12,11 @@ const messageSchema = new mongoose.Schema(
       enum: ["Customer", "ServiceProvider"],
       required: true,
     },
+    serviceRequest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ServiceRequest",
+      required: true,
+    },
     chat: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Chat",

@@ -3,6 +3,8 @@ import { Image, Text, View, Dimensions } from "react-native";
 import { icons } from "../../constants";
 import { colors } from "../../constants/colors";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
 const screenWidth = Dimensions.get("window").width;
 const tabCount = 5;
@@ -49,64 +51,68 @@ const TabIcon = ({ icon, color, name, focused }) => {
 const ProviderTabsLayout = () => {
   const pathname = usePathname();
 
-  const hide = pathname.includes("provider/profile/");
+  const hide =
+    pathname.includes("provider/profile/") ||
+    pathname.includes("provider/chat/") ||
+    pathname.includes("provider/bookings/");
 
   return (
-    <>
-      <Tabs
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          animation: "shift",
-          tabBarShowLabel: false,
-          tabBarActiveTintColor: " black",
-          tabBarInactiveTintColor: colors.mutedForeground,
-          tabBarStyle: {
-            display: hide ? "none" : "flex",
-            backgroundColor: colors.mutedLight,
-            borderTopWidth: 1,
-            borderTopColor: colors.muted,
-            borderColor: "transparent",
-            shadowColor: "white",
-            height: 100,
-            paddingTop: 15,
-            paddingBottom: 30,
-            position: "absolute",
-            bottom: 0,
-          },
-        })}
-      >
-        {tabScreens.map((tab, index) => (
-          <Tabs.Screen
-            key={tab.name}
-            name={tab.name}
-            options={{
-              title: tab.label,
-              headerShown: false,
-              // headerStyle: {
-              //   backgroundColor: colors.primary,
-              //   color: "white",
-              // },
-              // headerTitleStyle: {
-              //   color: "white",
-              //   fontFamily: "Poppins-Medium",
-              //   fontSize: 22,
-              // },
-              // headerBackButtonDisplayMode: "minimal",
-              tabBarIcon: ({ color, focused }) => (
-                <TabIcon
-                  icon={tab.icon}
-                  color={color}
-                  name={tab.label}
-                  focused={focused}
-                />
-              ),
-            }}
-          />
-        ))}
-      </Tabs>
+    <View style={{ flex: 1, backgroundColor: colors.primary }}>
+      <LinearGradient
+        colors={[
+          colors.primary,
+          colors.primary,
+          colors.primary,
+          colors.mutedLight,
+          colors.mutedLight,
+          colors.mutedLight,
+        ]}
+        style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0 }}
+      />
+      <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarActiveTintColor: " black",
+            tabBarInactiveTintColor: colors.mutedForeground,
+            tabBarStyle: {
+              display: hide ? "none" : "flex",
+              backgroundColor: colors.mutedLight,
+              borderTopWidth: 1,
+              borderTopColor: colors.muted,
+              borderColor: "transparent",
+              shadowColor: "white",
+              height: 70,
+              alignItems: "flex-start",
+              paddingTop: 15,
+              paddingBottom: 10,
+            },
+          }}
+        >
+          {tabScreens.map((tab, index) => (
+            <Tabs.Screen
+              key={tab.name + index}
+              name={tab.name}
+              options={{
+                title: tab.label,
+                headerShown: false,
+                tabBarIcon: ({ color, focused }) => (
+                  <TabIcon
+                    icon={tab.icon}
+                    color={color}
+                    name={tab.label}
+                    focused={focused}
+                  />
+                ),
+              }}
+            />
+          ))}
+        </Tabs>
+      </SafeAreaView>
 
-      <StatusBar backgroundColor={"transparent"} style="dark" />
-    </>
+      <StatusBar style="light" />
+    </View>
   );
 };
 

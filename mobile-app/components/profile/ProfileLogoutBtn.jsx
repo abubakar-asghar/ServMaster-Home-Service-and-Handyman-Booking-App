@@ -14,8 +14,8 @@ const ProfileLogoutBtn = () => {
 
   const handleLogout = async () => {
     setLoading(true);
-    dispatch(logoutUser);
     await clearStorage();
+    dispatch(logoutUser());
 
     router.replace("/auth/login");
     setLoading(false);

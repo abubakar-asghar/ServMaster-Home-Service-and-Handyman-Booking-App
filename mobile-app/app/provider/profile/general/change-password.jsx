@@ -1,17 +1,18 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import TabHeader from "../../../../components/ui/TabHeader";
 import FormField from "../../../../components/ui/FormField";
 import CustomButton from "../../../../components/ui/CustomButton";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
+import { useUpdateProviderPassword } from "../../../../hooks/useProvider";
 
 const ProviderChangePassword = () => {
-  const router = useRouter();
-
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const { mutateAsync: updatePassword, isPending } =
+    useUpdateProviderPassword();
 
   const handleChangePassword = async () => {
     // Handle the change password logic here
@@ -19,12 +20,15 @@ const ProviderChangePassword = () => {
       alert("New Password and Confirm Password do not match.");
       return;
     }
-    // Call your API to change the password
-    console.log("Password Changed", { oldPassword, newPassword });
+    try {
+      await updatePassword({ newPassword, oldPassword });
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* Header */}
       <TabHeader title={"Change Password"} goBack />
 
@@ -67,14 +71,17 @@ const ProviderChangePassword = () => {
           title={"Go Back"}
           handlePress={() => router.back()}
           containerStyles={"bg-secondary w-[48%]"}
+          disabled={isPending}
         />
         <CustomButton
           title={"Update"}
           handlePress={() => handleChangePassword()}
           containerStyles={"bg-primary w-[48%]"}
+          isLoading={isPending}
+          disabled={isPending}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

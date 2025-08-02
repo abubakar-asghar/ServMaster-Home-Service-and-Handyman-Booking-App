@@ -1,12 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  provider: "",
-  service: "",
-  selected_day: "",
-  selected_time: "",
-  address: "",
-  customer_notes: "",
+  bookingInfo: {
+    service_provider: "",
+    service: "",
+    scheduled_time: "",
+    customer_notes: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "Pakistan",
+    location: {
+      longitude: null,
+      latitude: null,
+    },
+  },
+  serviceInfo: {
+    name: "",
+    icon: "",
+    pricing: {},
+  },
+  providerInfo: {},
 };
 
 const bookingSlice = createSlice({
@@ -14,11 +28,22 @@ const bookingSlice = createSlice({
   initialState,
   reducers: {
     setBookingInfo: (state, action) => {
-      return { ...state, ...action.payload };
+      state.bookingInfo = action.payload;
     },
-    clearBookingInfo: () => initialState,
+    setServiceInfo: (state, action) => {
+      state.serviceInfo = action.payload;
+    },
+    setProviderInfo: (state, action) => {
+      state.providerInfo = action.payload;
+    },
+    clearBookingState: () => initialState,
   },
 });
 
-export const { setBookingInfo, clearBookingInfo } = bookingSlice.actions;
+export const {
+  setBookingInfo,
+  setProviderInfo,
+  setServiceInfo,
+  clearBookingInfo,
+} = bookingSlice.actions;
 export default bookingSlice.reducer;

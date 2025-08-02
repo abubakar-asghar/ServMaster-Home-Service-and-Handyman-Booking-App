@@ -3,22 +3,22 @@
 import { Fragment, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "../../components/ui/sidebar";
+import { Separator } from "../../components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-// import { useTheme } from "@/components/theme-provider";
-// import { Button } from "@/components/ui/button";
+} from "../../components/ui/breadcrumb";
+// import { useTheme } from "../../components/theme-provider";
+// import { Button } from "../../components/ui/button";
 // import { Laptop, Moon, Sun } from "lucide-react";
 import { useSelector } from "react-redux";
-import { Skeleton } from "@/components/ui/skeleton";
-import { NavUser } from "@/components/header/NavUser";
-// import UserSettingsModal from "@/components/settings/user/UserSettingsModal";
+import { Skeleton } from "../../components/ui/skeleton";
+import { NavUser } from "../../components/header/NavUser";
+// import UserSettingsModal from "../../components/settings/user/UserSettingsModal";
 
 // function ModeToggle() {
 //   const { setTheme, theme } = useTheme();

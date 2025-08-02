@@ -4,20 +4,45 @@ import asyncHandler from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../utils/errorHandler.js";
 
 /**
- * @desc    Get all chats for the logged-in user
- * @route   GET /api/chats
+ * @desc    Get all chats for the logged-in Provider
+ * @route   GET /api/chats/provider
  * @access  Private
  */
-export const getAllChats = asyncHandler(async (req, res, next) => {
-  const userId = req.user._id;
+export const getAllProviderChats = asyncHandler(async (req, res, next) => {
+  const userId = req.serviceProvider._id;
 
   const chats = await Chat.find({
     "participants.user": userId,
   })
-    .populate("participants.user", "fullName phone profile_image")
+    .populate("participants.user", "fullName phone profileImage")
     .populate("lastMessage");
 
-  res.status(200).json({ success: true, chats });
+  res.status(200).json({
+    success: true,
+    message: "Chats fetched successfully",
+    data: chats,
+  });
+});
+
+/**
+ * @desc    Get all chats for the logged-in customer
+ * @route   GET /api/chats/customer
+ * @access  Private
+ */
+export const getAllCustomerChats = asyncHandler(async (req, res, next) => {
+  const userId = req.customer._id;
+
+  const chats = await Chat.find({
+    "participants.user": userId,
+  })
+    .populate("participants.user", "fullName phone profileImage")
+    .populate("lastMessage");
+
+  res.status(200).json({
+    success: true,
+    message: "Chats fetched successfully",
+    data: chats,
+  });
 });
 
 /**
@@ -26,10 +51,10 @@ export const getAllChats = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 export const createOrFetchChat = asyncHandler(async (req, res, next) => {
-  const { participantId, participantType } = req.body;
+  const { participantId, participantType, serviceRequestId } = req.body;
 
-  if (!participantId || !participantType) {
-    return next(new ErrorHandler("Participant ID and type are required", 400));
+  if (!participantId || !participantType || !serviceRequestId) {
+    return next(new ErrorHandler(400, "All fields are required"));
   }
 
   const currentUser = {
@@ -42,28 +67,32 @@ export const createOrFetchChat = asyncHandler(async (req, res, next) => {
     participantType,
   };
 
-  const existingChat = await Chat.findOne({
+  // Look for existing chat between the same participants
+  let chat = await Chat.findOne({
     participants: {
       $all: [{ $elemMatch: currentUser }, { $elemMatch: otherParticipant }],
     },
-  })
-    .populate("participants.user", "name email profile_image")
-    .populate("lastMessage");
+  }).populate("participants.user", "fullName phone profileImage");
 
-  if (existingChat) {
-    return res.status(200).json({ success: true, chat: existingChat });
+  if (!chat) {
+    // Create new chat
+    chat = await Chat.create({
+      participants: [currentUser, otherParticipant],
+      activeServiceRequest: serviceRequestId,
+      isActive: true,
+    });
+  } else {
+    // Update existing chat to set new service request and mark it active again
+    chat.activeServiceRequest = serviceRequestId;
+    chat.isActive = true;
+    await chat.save();
   }
 
-  const chat = await Chat.create({
-    participants: [currentUser, otherParticipant],
-  });
+  const populatedChat = await Chat.findById(chat._id)
+    .populate("participants.user", "fullName phone profileImage")
+    .populate("lastMessage");
 
-  const populatedChat = await Chat.findById(chat._id).populate(
-    "participants.user",
-    "name email profile_image"
-  );
-
-  res.status(201).json({ success: true, chat: populatedChat });
+  res.status(200).json({ success: true, data: populatedChat });
 });
 
 /**
@@ -75,13 +104,17 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
   const { chatId } = req.params;
   const { text, image, file } = req.body;
 
-  if (!text && !image && !file) {
-    return next(new ErrorHandler("Message must have content", 400));
-  }
+  const chat = await Chat.findById(chatId);
+  if (!chat) return next(new ErrorHandler(404, "Chat not found"));
+  if (!chat.isActive)
+    return next(new ErrorHandler(403, "Chat session is inactive"));
+  if (!chat.activeServiceRequest)
+    return next(
+      new ErrorHandler(400, "No active service request for this chat")
+    );
 
-  const chatExists = await Chat.exists({ _id: chatId });
-  if (!chatExists) {
-    return next(new ErrorHandler("Chat not found", 404));
+  if (!text && !image && !file) {
+    return next(new ErrorHandler(400, "Message must have content"));
   }
 
   const message = await Message.create({
@@ -91,35 +124,34 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
     text,
     image,
     file,
+    serviceRequest: chat.activeServiceRequest,
   });
 
-  await Chat.findByIdAndUpdate(chatId, {
-    $push: { messages: message._id },
-    lastMessage: message._id,
-  });
+  // Update chat with message
+  chat.messages.push(message._id);
+  chat.lastMessage = message._id;
+  await chat.save();
 
-  const populatedMessage = await Message.findById(message._id).populate(
-    "sender",
-    "name profile_image"
-  );
+  const populatedMessage = await Message.findById(message._id);
 
-  res.status(201).json({ success: true, message: populatedMessage });
+  res.status(201).json({ success: true, data: populatedMessage });
 });
 
 /**
  * @desc    Get all messages from a chat
- * @route   GET /api/chats/:chatId/messages
+ * @route   GET /api/chats/messages/:chatId
  * @access  Private
  */
 export const getChatMessages = asyncHandler(async (req, res, next) => {
   const { chatId } = req.params;
 
-  const messages = await Message.find({ chat: chatId }).populate(
-    "sender",
-    "name profile_image"
-  );
+  const messages = await Message.find({ chat: chatId });
 
-  res.status(200).json({ sucfcess: true, messages });
+  if (!messages) {
+    res.status(200).json({ success: true, data: [] });
+  }
+
+  res.status(200).json({ success: true, data: messages });
 });
 
 /**
@@ -138,47 +170,43 @@ export const deleteChatAndMessages = asyncHandler(async (req, res, next) => {
     .json({ success: true, message: "Chat and messages deleted successfully" });
 });
 
-// // Pass `io` from server.js
-// export const sendMessageWithSocket = (io) =>
-//   asyncHandler(async (req, res, next) => {
-//     const { chatId } = req.params;
-//     const { text, image, file } = req.body;
+export const sendMessageWithSocket = (io) =>
+  asyncHandler(async (req, res, next) => {
+    const { chatId } = req.params;
+    const { text, image, file } = req.body;
 
-//     if (!text && !image && !file) {
-//       return next(new ErrorHandler("Message cannot be empty", 400));
-//     }
+    const chat = await Chat.findById(chatId);
+    if (!chat) return next(new ErrorHandler(404, "Chat not found"));
+    if (!chat.isActive)
+      return next(new ErrorHandler(403, "Chat session is inactive"));
+    if (!chat.activeServiceRequest)
+      return next(
+        new ErrorHandler(400, "No active service request for this chat")
+      );
+    if (!text && !image && !file) {
+      return next(new ErrorHandler(400, "Message must have content"));
+    }
 
-//     const chat = await Chat.findById(chatId);
-//     if (!chat) {
-//       return next(new ErrorHandler("Chat not found", 404));
-//     }
+    // Create and store message
+    const message = await Message.create({
+      sender: req.user._id,
+      senderType: req.user.role,
+      chat: chatId,
+      text,
+      image,
+      file,
+      serviceRequest: chat.activeServiceRequest,
+    });
 
-//     // Create message
-//     const message = await Message.create({
-//       sender: req.user._id,
-//       senderType: req.user.role,
-//       chat: chatId,
-//       text,
-//       image,
-//       file,
-//     });
+    // Update chat
+    chat.messages.push(message._id);
+    chat.lastMessage = message._id;
+    await chat.save();
 
-//     // Update chat
-//     chat.messages.push(message._id);
-//     chat.lastMessage = message._id;
-//     await chat.save();
+    const populatedMessage = await Message.findById(message._id);
 
-//     // Populate sender details
-//     const populatedMessage = await Message.findById(message._id).populate(
-//       "sender",
-//       "name profile_image"
-//     );
+    // Emit message to all users in this chat room
+    io.to(chatId).emit("newMessage", populatedMessage);
 
-//     // Emit to the chat room
-//     io.to(chatId).emit("newMessage", populatedMessage);
-
-//     res.status(201).json({
-//       success: true,
-//       message: populatedMessage,
-//     });
-//   });
+    res.status(201).json({ success: true, data: populatedMessage });
+  });

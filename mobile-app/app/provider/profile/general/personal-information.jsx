@@ -1,13 +1,12 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import TabHeader from "../../../../components/ui/TabHeader";
 import FormField from "../../../../components/ui/FormField";
 import CustomButton from "../../../../components/ui/CustomButton";
-import Dropdown from "../../../../components/ui/Dropdown";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { useSelector } from "react-redux";
 import { useUpdateProviderPersonalInfo } from "../../../../hooks/useProvider";
+import CustomDropdown from "../../../../components/ui/CustomDropdown";
 
 const ErrorText = ({ error }) => {
   return (
@@ -18,8 +17,6 @@ const ErrorText = ({ error }) => {
 };
 
 const ProviderPersonalInfo = () => {
-  const router = useRouter();
-
   const [errors, setErrors] = useState({});
 
   const { user } = useSelector((state) => state.auth);
@@ -97,7 +94,7 @@ const ProviderPersonalInfo = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       {/* Header */}
       <TabHeader title={"Personal Information"} goBack />
 
@@ -157,15 +154,18 @@ const ProviderPersonalInfo = () => {
           {/* Gender Dropdown */}
           <View className="mt-5">
             <Text className="text-base text-text font-pmedium">Gender</Text>
-            <Dropdown
+            <CustomDropdown
               placeholder="Select Gender"
-              defaultValue={getGenderFormat[formData.gender] || ""}
-              data={[
-                { key: "1", value: "Male" },
-                { key: "2", value: "Female" },
-                { key: "3", value: "Prefer not to say" },
+              selectedValue={formData.gender || ""}
+              options={[
+                // { key: "1", value: "Male" },
+                // { key: "2", value: "Female" },
+                // { key: "3", value: "Prefer not to say" },
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+                { value: "prefer_not_to_say", label: "Prefer not to say" },
               ]}
-              onChange={(value) => {
+              onValueChange={(value) => {
                 console.log("Selected", value);
                 setFormData({
                   ...formData,
@@ -191,7 +191,7 @@ const ProviderPersonalInfo = () => {
           isLoading={isPending}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -8,7 +8,7 @@ import {
   Dimensions,
   Alert,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link, router } from "expo-router";
 import Checkbox from "expo-checkbox";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRegisterProvider } from "../../hooks/useProvider";
@@ -17,6 +17,7 @@ import CustomButton from "../../components/ui/CustomButton";
 import { icons, images } from "../../constants";
 import { colors } from "../../constants/colors";
 import Dropdown from "../../components/ui/Dropdown";
+import { commonRoutes } from "../../lib/routes";
 
 const ErrorText = ({ error }) => {
   return (
@@ -27,8 +28,6 @@ const ErrorText = ({ error }) => {
 };
 
 const ProviderRegister = () => {
-  const router = useRouter();
-
   const [errors, setErrors] = useState({});
   const [gender, setGender] = useState(null);
   // const [providerType, setProviderType] = useState(null);
@@ -95,7 +94,7 @@ const ProviderRegister = () => {
       });
 
       if (response.success) {
-        router.push("/auth/login");
+        router.push(commonRoutes.LOGIN);
       } else {
         console.log(
           response.message || "Registration failed. Please try again."

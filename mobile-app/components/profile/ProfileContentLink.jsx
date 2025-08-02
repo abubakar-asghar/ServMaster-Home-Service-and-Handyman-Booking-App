@@ -1,17 +1,14 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../../constants/colors";
 import { icons } from "../../constants";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 
 const ProfileContentLink = ({ item }) => {
-  const router = useRouter();
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       className="flex-row items-center px-5 py-5"
-      onPress={() =>
-        router.push(`${item.route}`)
-      }
+      onPress={() => router.push(item.route)}
     >
       <View className="flex-row items-center">
         <Image

@@ -8,12 +8,20 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link, router } from "expo-router";
 import FormField from "../../components/ui/FormField";
 import CustomButton from "../../components/ui/CustomButton";
 import { icons, images } from "../../constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginUser } from "../../hooks/useAuth";
+
+const ErrorText = ({ error }) => {
+  return (
+    <Text className="text-red-500 font-pregular text-sm mt-1 ml-2">
+      {error}
+    </Text>
+  );
+};
 
 const LoginScreen = () => {
   const [form, setForm] = useState({
@@ -51,11 +59,7 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     if (!validateForm()) return;
 
-    try {
-      await loginUser(form);
-    } catch (error) {
-      Alert.alert("Login Failed", "Invalid phone number or password.");
-    }
+    await loginUser(form);
   };
 
   return (

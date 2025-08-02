@@ -1,8 +1,15 @@
 import jwt from "jsonwebtoken";
 
-// Generate JWT Token
-export const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+export const generateLimitedToken = (userId, role) => {
+  return jwt.sign(
+    { id: userId, role, isTemporary: true },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+};
+
+export const generateToken = (userId, role) => {
+  return jwt.sign({ id: userId, role }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 };

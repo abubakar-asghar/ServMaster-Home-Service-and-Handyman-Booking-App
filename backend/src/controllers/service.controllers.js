@@ -13,13 +13,13 @@ export const createService = asyncHandler(async (req, res, next) => {
 
   if (!name || !parent_service) {
     return next(
-      new ErrorHandler("Service name and parent service ID are required", 400)
+      new ErrorHandler(400, "Service name and parent service ID are required")
     );
   }
 
   const parentExists = await ServiceCategory.findById(parent_service);
   if (!parentExists) {
-    return next(new ErrorHandler("Parent service category not found", 404));
+    return next(new ErrorHandler(404, "Parent service category not found"));
   }
 
   const service = await Service.create({
@@ -46,7 +46,7 @@ export const createMultipleServices = asyncHandler(async (req, res, next) => {
   // Validate array
   if (!Array.isArray(services) || services.length === 0) {
     return next(
-      new ErrorHandler("services array is required and cannot be empty", 400)
+      new ErrorHandler(400, "Services array is required and cannot be empty")
     );
   }
 
@@ -55,8 +55,8 @@ export const createMultipleServices = asyncHandler(async (req, res, next) => {
     if (!sub.name || !sub.parent_service) {
       return next(
         new ErrorHandler(
-          "Each service must have a name and parent_service ID",
-          400
+          400,
+          "Each service must have a name and parent_service ID"
         )
       );
     }
@@ -95,7 +95,7 @@ export const getServicesByParent = asyncHandler(async (req, res, next) => {
 
   const parentExists = await ServiceCategory.findById(parentId);
   if (!parentExists) {
-    return next(new ErrorHandler("Parent service category not found", 404));
+    return next(new ErrorHandler(404, "Parent service category not found"));
   }
 
   const services = await Service.find({ parent_service: parentId });
@@ -118,7 +118,7 @@ export const getServiceById = asyncHandler(async (req, res, next) => {
     "name"
   );
   if (!service) {
-    return next(new ErrorHandler("Service not found", 404));
+    return next(new ErrorHandler(404, "Service not found"));
   }
 
   res.status(200).json({
@@ -137,13 +137,13 @@ export const updateService = asyncHandler(async (req, res, next) => {
   let service = await Service.findById(req.params.id);
 
   if (!service) {
-    return next(new ErrorHandler("Service not found", 404));
+    return next(new ErrorHandler(404, "Service not found"));
   }
 
   if (parent_service) {
     const parentExists = await ServiceCategory.findById(parent_service);
     if (!parentExists) {
-      return next(new ErrorHandler("Parent service category not found", 404));
+      return next(new ErrorHandler(404, "Parent service category not found"));
     }
   }
 
@@ -168,7 +168,7 @@ export const updateService = asyncHandler(async (req, res, next) => {
 export const deleteService = asyncHandler(async (req, res, next) => {
   const service = await Service.findById(req.params.id);
   if (!service) {
-    return next(new ErrorHandler("Service not found", 404));
+    return next(new ErrorHandler(404, "Service not found"));
   }
 
   await service.deleteOne();
@@ -176,5 +176,36 @@ export const deleteService = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Service deleted successfully",
+  });
+});
+
+export const updateIconOfServices = asyncHandler(async (req, res, next) => {
+  const data = req.body;
+
+  console.log(data);
+
+  if (!Array.isArray(data)) {
+    return next(new ErrorHandler(400, "Given data is not formatted correctly"));
+  }
+
+  // Prepare all update operations in parallel
+  const updatePromises = data.map(async (item) => {
+    const services = await Service.find({ parent_service: item.category });
+
+    // Update icon for each service
+    const serviceUpdatePromises = services.map(async (service) => {
+      service.icon = item.icon;
+      return service.save(); // Return the promise
+    });
+
+    return Promise.all(serviceUpdatePromises); // Wait for all inner saves
+  });
+
+  // Wait for all outer updates
+  await Promise.all(updatePromises);
+
+  res.status(200).json({
+    success: true,
+    message: "Icons updated in all services successfully",
   });
 });
