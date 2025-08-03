@@ -1,11 +1,54 @@
 import { io } from "socket.io-client";
+import { useChatStore } from "../zustand/chatStore";
 
-// ✅ Replace with your actual backend URL (adjust for LAN/production)
-export const socket = io("http://192.168.0.104:5000", {
-  autoConnect: false, // Don't connect immediately — connect only after login
-  transports: ["websocket"],
-  withCredentials: true,
-});
+let socket;
+
+export const initializeSocket = (token) => {
+  if (!socket) {
+    socket = io("http://192.168.0.104:5000", {
+      autoConnect: false,
+      transports: ["websocket"],
+      auth: { token },
+    });
+
+    // Connect the socket
+    socket.connect();
+
+    // Set up global event listeners
+    const { addMessage, markMessagesAsSeen } = useChatStore.getState();
+
+    socket.on("newMessage", (message) => {
+      addMessage(message);
+    });
+
+    socket.on("messageSeen", ({ chatId }) => {
+      markMessagesAsSeen(chatId);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.log("Socket connection error:", err.message);
+    });
+  }
+
+  return socket;
+};
+
+export const getSocket = () => socket;
+
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+};
+// import { io } from "socket.io-client";
+
+// // ✅ Replace with your actual backend URL (adjust for LAN/production)
+// export const socket = io("http://192.168.0.104:5000", {
+//   autoConnect: false, // Don't connect immediately — connect only after login
+//   transports: ["websocket"],
+//   withCredentials: true,
+// });
 
 // import { io } from "socket.io-client";
 // import { Platform } from "react-native";

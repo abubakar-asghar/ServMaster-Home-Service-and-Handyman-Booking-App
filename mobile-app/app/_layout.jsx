@@ -24,7 +24,19 @@ function Root() {
 
   // Initialize push notifications
   const { user } = useSelector((state) => state.auth);
+
+  // Initialize push notifications
   usePushNotifications(user);
+
+  // Initialize socket when user logs in
+  useEffect(() => {
+    if (user?.token) {
+      initializeSocket(user.token);
+    }
+    return () => {
+      disconnectSocket();
+    };
+  }, [user?.token]);
 
   // Android back handler
   useEffect(() => {

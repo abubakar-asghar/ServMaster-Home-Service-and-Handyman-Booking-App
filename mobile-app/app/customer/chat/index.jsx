@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
 import React, { useEffect } from "react";
 import TabHeader from "../../../components/ui/TabHeader";
 import SearchBar from "../../../components/ui/SearchBar";
@@ -15,14 +8,11 @@ import { colors } from "../../../constants/colors";
 import { icons } from "../../../constants";
 import ChatSkeleton from "../../../components/skeletons/chat/ChatSkeleton";
 import { useChatStore } from "../../../zustand/chatStore";
-import { useSelector } from "react-redux";
 import { customerRoutes } from "../../../lib/routes";
 
 const CustomerChat = () => {
-  const { selectedChat, setSelectedChat } = useChatStore();
+  const { chats, setChats, selectedChat, setSelectedChat } = useChatStore();
   const { data, isPending: isLoadingChats, error } = useGetAllCustomerChats();
-
-  const chats = data?.data || [];
 
   const handleSelectChat = (chat) => {
     setSelectedChat(chat);
@@ -30,7 +20,9 @@ const CustomerChat = () => {
   };
 
   useEffect(() => {
-    // console.log("Fetched Chats:", chats);
+    if (data?.data) {
+      setChats(data.data); // Store fetched chats in the Zustand store
+    }
   }, [data?.data]);
 
   return (

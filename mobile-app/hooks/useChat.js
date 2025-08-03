@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert } from "react-native";
 import {
   getAllProviderChats,
   getAllCustomerChats,
@@ -6,86 +7,106 @@ import {
   sendMessage,
   sendMessageWithSocket,
 } from "../api/services/chatApi";
+import { useEffect } from "react";
 import { useChatStore } from "../zustand/chatStore";
-import { Alert } from "react-native";
 
-// ✅ Fetch all chats for service providers
+// Common configuration for chat queries
+const chatQueryConfig = {
+  staleTime: 1000 * 60 * 5, // 5 minutes
+  onError: (error) => {
+    Alert.alert("Error", error?.message || "Failed to fetch chat data");
+  },
+};
+
 export const useGetAllProviderChats = () => {
+  const { setChats } = useChatStore();
   return useQuery({
     queryKey: ["provider-chats"],
     queryFn: getAllProviderChats,
+    ...chatQueryConfig,
+    onSuccess: (data) => setChats(data.data),
   });
 };
 
-// ✅ Fetch all chats for customers
 export const useGetAllCustomerChats = () => {
+  const { setChats } = useChatStore();
   return useQuery({
     queryKey: ["customer-chats"],
     queryFn: getAllCustomerChats,
+    ...chatQueryConfig,
+    onSuccess: (data) => setChats(data.data),
   });
 };
 
-// ✅ Fetch messages for a given chat
 export const useGetChatMessages = (chatId) => {
-  const { setMessages } = useChatStore();
-
+  const { setMessages, markMessagesAsSeen } = useChatStore();
   return useQuery({
-    queryKey: ["user-chat-messages", chatId],
+    queryKey: ["chat-messages", chatId],
     queryFn: () => getChatMessages(chatId),
     enabled: !!chatId,
-    onSuccess: (res) => {
-      setMessages(res.data || []);
+    ...chatQueryConfig,
+    onSuccess: (data) => {
+      setMessages(data.data || []);
+      if (data.data?.length) markMessagesAsSeen(chatId);
     },
   });
 };
 
-// ✅ Send a message
 export const useSendMessage = () => {
-  const queryClient = useQueryClient();
   const { addMessage } = useChatStore();
-
   return useMutation({
-    mutationFn: ({ chatId, content }) => sendMessage({ chatId, content }),
-    mutationKey: ["send-message"],
-    onSuccess: (res, { chatId }) => {
-      if (res.data) {
-        addMessage(res.data); // ✅ Add message to Zustand store immediately
-      }
-
-      // Optionally refetch or update React Query cache
-      queryClient.invalidateQueries(["user-chat-messages", chatId]);
-    },
-    onError: (err) => {
-      Alert.alert(
-        "Error",
-        err?.message || "Something went wrong while sending message"
-      );
+    mutationFn: sendMessage,
+    onSuccess: (data) => data.data && addMessage(data.data),
+    onError: (error) => {
+      Alert.alert("Error", error?.message || "Failed to send message");
     },
   });
 };
 
-// ✅ Send a message
+export const useSocketChat = (socket) => {
+  const { initializeSocket } = useChatStore();
+
+  // Initialize socket when hook is used
+  useEffect(() => {
+    if (socket) initializeSocket(socket);
+    return () => {
+      socket?.off("newMessage");
+      socket?.off("messageSeen");
+    };
+  }, [socket]);
+};
+
+// Optimistic updates version for Socket.io messages
 export const useSendMessageWithSocket = () => {
+  const { addMessage, socket } = useChatStore();
   const queryClient = useQueryClient();
-  const { addMessage } = useChatStore();
 
   return useMutation({
-    mutationFn: ({ chatId, content }) =>
-      sendMessageWithSocket({ chatId, content }),
-    mutationKey: ["send-message-with-socket"],
-    onSuccess: (res, { chatId }) => {
-      if (res.data) {
-        addMessage(res.data); // ✅ Add message to Zustand store immediately
-      }
+    mutationFn: async ({ chatId, content }) => {
+      // Optimistically update UI
+      const tempId = Date.now().toString();
+      const optimisticMessage = {
+        _id: tempId,
+        chat: chatId,
+        text: content.text,
+        createdAt: new Date().toISOString(),
+        sender: content.sender,
+        senderType: content.senderType,
+        seen: false,
+      };
+      addMessage(optimisticMessage);
 
-      // Optionally refetch or update React Query cache
-      queryClient.invalidateQueries(["user-chat-messages", chatId]);
+      // Send via socket
+      const response = await sendMessageWithSocket({ chatId, content });
+
+      // Replace optimistic message with real one
+      if (response.data) {
+        addMessage(response.data);
+      }
+      return response;
     },
-    onError: (err) => {
-      Alert.alert(
-        "Error",
-        err?.message || "Something went wrong while sending message"
-      );
+    onError: (error, variables) => {
+      Alert.alert("Error", error?.message || "Failed to send message");
     },
   });
 };

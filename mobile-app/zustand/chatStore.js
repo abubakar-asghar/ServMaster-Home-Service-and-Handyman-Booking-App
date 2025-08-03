@@ -1,244 +1,217 @@
 import { create } from "zustand";
 
 export const useChatStore = create((set, get) => ({
-  // Currently selected chat (object or null)
+  chats: [],
   selectedChat: null,
-  setSelectedChat: (chat) => set({ selectedChat: chat }),
-
-  // Messages of the active chat
   messages: [],
-  setMessages: (messagesOrUpdater) =>
-    set((state) => ({
-      messages:
-        typeof messagesOrUpdater === "function"
-          ? messagesOrUpdater(state.messages)
-          : messagesOrUpdater,
-    })),
+  socket: null,
 
-  addMessage: (newMessage) =>
+  // Setter methods
+  setChats: (chats) => set({ chats: sortChatsByLastMessage(chats) }),
+  setSelectedChat: (chat) => set({ selectedChat: chat }),
+  setMessages: (messages) => set({ messages }),
+  setSocket: (socket) => set({ socket }),
+
+  // Chat operations
+  addOrUpdateChat: (newChat) =>
     set((state) => {
-      const exists = state.messages.some((msg) => msg._id === newMessage._id);
-      if (exists) return {}; // do not update
-      return { messages: [...state.messages, newMessage] };
+      const existingIndex = state.chats.findIndex((c) => c._id === newChat._id);
+      const updatedChats =
+        existingIndex >= 0
+          ? state.chats.map((c) => (c._id === newChat._id ? newChat : c))
+          : [...state.chats, newChat];
+      return { chats: sortChatsByLastMessage(updatedChats) };
     }),
 
-  prependMessages: (olderMessages = []) =>
+  // Message operations
+  addMessage: (newMessage) =>
+    set((state) => {
+      // Update messages list
+      const updatedMessages = state.messages.some(
+        (m) => m._id === newMessage._id
+      )
+        ? state.messages
+        : [...state.messages, newMessage];
+
+      // Update last message in chats
+      const updatedChats = state.chats.map((chat) =>
+        chat._id === newMessage.chat
+          ? { ...chat, lastMessage: newMessage, updatedAt: new Date() }
+          : chat
+      );
+
+      return {
+        messages: updatedMessages,
+        chats: sortChatsByLastMessage(updatedChats),
+      };
+    }),
+
+  prependMessages: (olderMessages) =>
     set((state) => ({
       messages: [...olderMessages, ...state.messages],
     })),
 
-  updateMessage: (id, updates) =>
+  markMessagesAsSeen: (chatId) =>
     set((state) => ({
       messages: state.messages.map((msg) =>
-        msg._id === id ? { ...msg, ...updates } : msg
+        msg.chat === chatId ? { ...msg, seen: true } : msg
+      ),
+      chats: state.chats.map((chat) =>
+        chat._id === chatId && chat.lastMessage
+          ? { ...chat, lastMessage: { ...chat.lastMessage, seen: true } }
+          : chat
       ),
     })),
 
-  updateLastMessageInChatList: (newMessage) =>
-    set((state) => {
-      const updatedChats = state.chats.map((chat) => {
-        if (chat._id === newMessage.chat) {
-          return { ...chat, lastMessage: newMessage, updatedAt: new Date() };
-        }
-        return chat;
-      });
+  // Socket.io operations
+  initializeSocket: (socket) => {
+    set({ socket });
+    socket.on("newMessage", (message) => {
+      get().addMessage(message);
+    });
+    socket.on("messageSeen", ({ chatId }) => {
+      get().markMessagesAsSeen(chatId);
+    });
+  },
 
-      return { chats: updatedChats };
-    }),
-
-  clearMessages: () => set({ messages: [] }),
+  // Utility methods
+  getUnreadCount: (chatId) => {
+    return get().messages.filter(
+      (msg) =>
+        msg.chat === chatId &&
+        !msg.seen &&
+        msg.senderType !==
+          (get().selectedChat?.participants[0]?.participantType === "Customer"
+            ? "Customer"
+            : "ServiceProvider")
+    ).length;
+  },
 }));
 
+// Helper function to sort chats by last message time
+const sortChatsByLastMessage = (chats) => {
+  return [...chats].sort(
+    (a, b) =>
+      new Date(b.lastMessage?.createdAt || b.updatedAt) -
+      new Date(a.lastMessage?.createdAt || a.updatedAt)
+  );
+};
+
 // import { create } from "zustand";
-// import { persist } from "zustand/middleware";
-// import { socket } from "../utils/socket";
-// import * as api from "../api/services/chatApi";
 
-// const useChatStore = create(
-//   persist(
-//     (set, get) => ({
-//       // State
-//       activeChats: [],
-//       currentChatId: null,
-//       messages: {},
-//       unreadCounts: {},
-//       onlineStatus: {},
-//       connectionStatus: "disconnected",
+// export const useChatStore = create((set, get) => ({
+//   chats: [],
+//   setChats: (chatsOrUpdater) =>
+//     set((state) => ({
+//       chats:
+//         typeof chatsOrUpdater === "function"
+//           ? chatsOrUpdater(state.chats)
+//           : chatsOrUpdater,
+//     })),
 
-//       // Getters
-//       getCurrentChat: () => {
-//         const { currentChatId, activeChats } = get();
-//         return activeChats.find((chat) => chat._id === currentChatId);
-//       },
+//   // Currently selected chat (object or null)
+//   selectedChat: null,
+//   setSelectedChat: (chat) => set({ selectedChat: chat }),
 
-//       getChatMessages: (chatId) => get().messages[chatId] || [],
+//   // Messages of the active chat
+//   messages: [],
+//   setMessages: (messagesOrUpdater) =>
+//     set((state) => ({
+//       messages:
+//         typeof messagesOrUpdater === "function"
+//           ? messagesOrUpdater(state.messages)
+//           : messagesOrUpdater,
+//     })),
 
-//       // Actions
-//       initializeSocket: () => {
-//         if (socket.connected) return;
+//   // Add new message and update last message in chat list
+//   addMessage: (newMessage) =>
+//     set((state) => {
+//       // Check if message already exists
+//       const exists = state.messages.some((msg) => msg._id === newMessage._id);
+//       if (exists) return {};
 
-//         socket.connect();
-//         set({ connectionStatus: "connecting" });
+//       // Update chat list with new last message
+//       const updatedChats = state.chats
+//         .map((chat) => {
+//           if (chat._id === newMessage.chat) {
+//             return {
+//               ...chat,
+//               lastMessage: newMessage,
+//               updatedAt: new Date(),
+//             };
+//           }
+//           return chat;
+//         })
+//         .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
-//         // Setup socket listeners
-//         socket.on("connect", () => {
-//           set({ connectionStatus: "connected" });
-//           // Rejoin any active chats
-//           get().activeChats.forEach((chat) => {
-//             socket.emit("joinChat", chat._id);
-//           });
-//         });
-
-//         socket.on("newMessage", (message) => {
-//           get().handleNewMessage(message);
-//         });
-
-//         socket.on("chatStatusChanged", ({ chatId, isActive }) => {
-//           get().handleChatStatusChange(chatId, isActive);
-//         });
-
-//         socket.on("disconnect", () => {
-//           set({ connectionStatus: "disconnected" });
-//         });
-//       },
-
-//       loadChats: async (userType) => {
-//         try {
-//           const fetchFn =
-//             userType === "provider"
-//               ? api.getAllProviderChats
-//               : api.getAllCustomerChats;
-
-//           const res = await fetchFn();
-
-//           set({
-//             activeChats: res.data,
-//             unreadCounts: res.data.reduce(
-//               (acc, chat) => ({
-//                 ...acc,
-//                 [chat._id]: chat.unreadCount || 0,
-//               }),
-//               {}
-//             ),
-//           });
-//         } catch (error) {
-//           console.error("Failed to load chats:", error);
-//         }
-//       },
-
-//       setCurrentChat: (chatId) => {
-//         socket.emit("joinChat", chatId);
-//         set({ currentChatId: chatId });
-//         get().markMessagesAsRead(chatId);
-//       },
-
-//       sendMessage: async (content) => {
-//         const { currentChatId } = get();
-//         if (!currentChatId) return;
-
-//         try {
-//           // Optimistic update
-//           const tempId = Date.now().toString();
-//           set((state) => ({
-//             messages: {
-//               ...state.messages,
-//               [currentChatId]: [
-//                 {
-//                   _id: tempId,
-//                   text: content,
-//                   sender: socket.id, // Temporary sender
-//                   senderType: "Customer", // Will be replaced by actual sender from server
-//                   chat: currentChatId,
-//                   isOptimistic: true,
-//                   createdAt: new Date().toISOString(),
-//                 },
-//                 ...(state.messages[currentChatId] || []),
-//               ],
-//             },
-//           }));
-
-//           // Real API call
-//           const res = await api.sendMessageWithSocket({
-//             chatId: currentChatId,
-//             content: { text: content },
-//           });
-
-//           // Replace optimistic message
-//           set((state) => ({
-//             messages: {
-//               ...state.messages,
-//               [currentChatId]: state.messages[currentChatId].map((msg) =>
-//                 msg._id === tempId ? res.data : msg
-//               ),
-//             },
-//           }));
-//         } catch (error) {
-//           // Rollback optimistic update
-//           set((state) => ({
-//             messages: {
-//               ...state.messages,
-//               [currentChatId]: state.messages[currentChatId].filter(
-//                 (msg) => msg._id !== tempId
-//               ),
-//             },
-//           }));
-//           throw error;
-//         }
-//       },
-
-//       handleNewMessage: (message) => {
-//         set((state) => {
-//           const isCurrentChat = state.currentChatId === message.chat;
-
-//           return {
-//             messages: {
-//               ...state.messages,
-//               [message.chat]: [
-//                 message,
-//                 ...(state.messages[message.chat] || []),
-//               ],
-//             },
-//             unreadCounts: {
-//               ...state.unreadCounts,
-//               [message.chat]: isCurrentChat
-//                 ? 0
-//                 : (state.unreadCounts[message.chat] || 0) + 1,
-//             },
-//           };
-//         });
-//       },
-
-//       markMessagesAsRead: (chatId) => {
-//         socket.emit("markAsSeen", { chatId });
-//         set((state) => ({
-//           unreadCounts: {
-//             ...state.unreadCounts,
-//             [chatId]: 0,
-//           },
-//         }));
-//       },
-
-//       handleChatStatusChange: (chatId, isActive) => {
-//         set((state) => ({
-//           activeChats: state.activeChats.map((chat) =>
-//             chat._id === chatId ? { ...chat, isActive } : chat
-//           ),
-//         }));
-//       },
-
-//       disconnect: () => {
-//         socket.disconnect();
-//         set({ connectionStatus: "disconnected" });
-//       },
+//       return {
+//         messages: [...state.messages, newMessage],
+//         chats: updatedChats,
+//       };
 //     }),
-//     {
-//       name: "chat-storage",
-//       partialize: (state) => ({
-//         activeChats: state.activeChats,
-//         unreadCounts: state.unreadCounts,
-//       }),
-//     }
-//   )
-// );
 
-// export default useChatStore;
+//   // For loading older messages (pagination)
+//   prependMessages: (olderMessages = []) =>
+//     set((state) => ({
+//       messages: [...olderMessages, ...state.messages],
+//     })),
+
+//   // Update specific message (e.g., mark as seen)
+//   updateMessage: (id, updates) =>
+//     set((state) => ({
+//       messages: state.messages.map((msg) =>
+//         msg._id === id ? { ...msg, ...updates } : msg
+//       ),
+//     })),
+
+//   // Mark all messages in current chat as seen
+//   markMessagesAsSeen: (chatId) =>
+//     set((state) => ({
+//       messages: state.messages.map((msg) =>
+//         msg.chat === chatId ? { ...msg, seen: true } : msg
+//       ),
+//       chats: state.chats.map((chat) => {
+//         if (chat._id === chatId && chat.lastMessage) {
+//           return {
+//             ...chat,
+//             lastMessage: { ...chat.lastMessage, seen: true },
+//           };
+//         }
+//         return chat;
+//       }),
+//     })),
+
+//   // Activate a chat (when service request is accepted)
+//   activateChat: (chatId) =>
+//     set((state) => ({
+//       chats: state.chats.map((chat) =>
+//         chat._id === chatId ? { ...chat, isActive: true } : chat
+//       ),
+//     })),
+
+//   // Clear messages when leaving chat
+//   clearMessages: () => set({ messages: [] }),
+
+//   // Get unread count for a specific chat
+//   getUnreadCount: (chatId) => {
+//     return get().messages.filter((msg) => msg.chat === chatId && !msg.seen)
+//       .length;
+//   },
+
+//   // Get total unread count across all chats
+//   getTotalUnreadCount: () => {
+//     return get().chats.reduce((total, chat) => {
+//       if (chat.lastMessage && !chat.lastMessage.seen) {
+//         return total + 1;
+//       }
+//       return total;
+//     }, 0);
+//   },
+
+//   // Find chat by service request ID
+//   findChatByServiceRequest: (serviceRequestId) => {
+//     return get().chats.find(
+//       (chat) => chat.activeServiceRequest?.toString() === serviceRequestId
+//     );
+//   },
+// }));
