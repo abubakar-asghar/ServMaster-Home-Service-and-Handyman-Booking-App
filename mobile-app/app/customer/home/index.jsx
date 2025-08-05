@@ -16,6 +16,7 @@ import { setSelectedLocation } from "../../../store/slices/locationSlice";
 import * as Location from "expo-location";
 import { useState } from "react";
 import { customerRoutes } from "../../../lib/routes";
+import { Ionicons } from "@expo/vector-icons";
 
 const serviceCategories = [
   {
@@ -254,7 +255,13 @@ const CustomerHomePage = () => {
                   </Text>
                 </ScrollView>
                 <Image
-                  source={icons.aim}
+                  source={
+                    <Ionicons
+                      name={"chatbox"}
+                      size={20}
+                      color={colors.primary}
+                    />
+                  }
                   resizeMode="contain"
                   className="w-6 h-6"
                   tintColor={colors.primary}
@@ -263,7 +270,13 @@ const CustomerHomePage = () => {
 
               <TouchableOpacity className="items-center justify-center bg-muted-100 min-h-[62px] min-w-[62px] rounded-xl p-2">
                 <Image
-                  source={icons.search}
+                  source={
+                    <Ionicons
+                      name={"chatbox"}
+                      size={20}
+                      color={colors.primary}
+                    />
+                  }
                   resizeMode="contain"
                   className="w-6 h-6"
                   tintColor={colors.primary}

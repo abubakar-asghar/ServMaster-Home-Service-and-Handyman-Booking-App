@@ -162,7 +162,7 @@ const ProvidersServices = () => {
               <SearchBar placeholder="Search Services" />
             </View>
             <CustomButton
-              icon={icons.plus}
+              icon={<Ionicons name={"add"} size={20} color={colors.primary} />}
               containerStyles="bg-primary w-12 h-12 rounded-lg shadow-sm"
               iconStyles="text-white"
               handlePress={() =>

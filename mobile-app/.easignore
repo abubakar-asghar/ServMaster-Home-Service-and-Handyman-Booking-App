@@ -1,0 +1,9 @@
+# Exclude these to reduce upload size
+node_modules/
+.expo/
+dist/
+*.log
+.env.local
+.DS_Store
+android/
+ios/

@@ -20,7 +20,7 @@ import {
   useGetBookingDetails,
   useUpdateBookingStatus,
 } from "../../../../hooks/useBookings";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import ProfileImage from "../../../../components/profile/ProfileImage";
 import ProviderBookingDetailsSkeleton from "../../../../components/skeletons/bookings/ProviderBookingDetailsSkeleton";
 
@@ -408,7 +408,13 @@ const ProviderBookingDetail = () => {
               {booking?.status === "accepted" && (
                 <View className="flex-row justify-between mt-4 pt-4 border-t border-gray-200 gap-3">
                   <CustomButton
-                    icon={icons.call}
+                    icon={
+                      <Ionicons
+                        name={"call"}
+                        size={20}
+                        color={colors.primary}
+                      />
+                    }
                     containerStyles="bg-primary flex-1 p-3"
                     textStyles="text-white"
                     handlePress={() =>
@@ -416,13 +422,25 @@ const ProviderBookingDetail = () => {
                     }
                   />
                   <CustomButton
-                    icon={icons.chat}
+                    icon={
+                      <Ionicons
+                        name={"chatbox"}
+                        size={20}
+                        color={colors.primary}
+                      />
+                    }
                     containerStyles="bg-white border border-gray-300 flex-1 p-3"
                     textStyles="text-primary"
                     handlePress={() => {}}
                   />
                   <CustomButton
-                    icon={icons.whatsapp}
+                    icon={
+                      <Ionicons
+                        name={"logo-whatsapp"}
+                        size={20}
+                        color={colors.success}
+                      />
+                    }
                     containerStyles="bg-white border border-gray-300 flex-1 p-3"
                     tintColor={false}
                     handlePress={() =>

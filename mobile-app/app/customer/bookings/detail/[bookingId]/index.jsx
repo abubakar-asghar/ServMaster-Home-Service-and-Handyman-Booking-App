@@ -24,7 +24,7 @@ import {
 } from "../../../../../hooks/useBookings";
 import CustomerBookingDetailsSkeleton from "../../../../../components/skeletons/bookings/CustomerBookingDetailsSkeleton";
 import ProfileImage from "../../../../../components/profile/ProfileImage";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { customerRoutes } from "../../../../../lib/routes";
 import {
   useCreateReview,
@@ -454,7 +454,13 @@ const BookingDetail = () => {
               {booking.status === "accepted" && (
                 <View className="flex-row justify-between mt-4 pt-4 border-t border-gray-200 gap-3">
                   <CustomButton
-                    icon={icons.call}
+                    icon={
+                      <Ionicons
+                        name={"call"}
+                        size={20}
+                        color={colors.primary}
+                      />
+                    }
                     containerStyles="bg-primary flex-1 p-3"
                     textStyles="text-white"
                     handlePress={() =>
@@ -462,14 +468,26 @@ const BookingDetail = () => {
                     }
                   />
                   <CustomButton
-                    icon={icons.chat}
+                    icon={
+                      <Ionicons
+                        name={"chatbox"}
+                        size={20}
+                        color={colors.primary}
+                      />
+                    }
                     containerStyles="bg-white border border-gray-300 flex-1 p-3"
                     textStyles="text-primary"
                     handlePress={() => {}}
                   />
                   {booking.service_provider?.personalInfo?.whatsapp && (
                     <CustomButton
-                      icon={icons.whatsapp}
+                      icon={
+                        <Ionicons
+                          name={"logo-whatsapp"}
+                          size={20}
+                          color={colors.success}
+                        />
+                      }
                       containerStyles="bg-white border border-gray-300 flex-1 p-3"
                       tintColor={false}
                       handlePress={() =>

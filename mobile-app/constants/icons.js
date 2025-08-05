@@ -18,13 +18,11 @@ import location from "../assets/icons/location.png";
 import aim from "../assets/icons/aim.png";
 import email from "../assets/icons/email.png";
 import phoneNumber from "../assets/icons/phone-number.png";
-import whatsapp from "../assets/icons/whatsapp.png";
 import call from "../assets/icons/call.png";
 import send from "../assets/icons/send.png";
 import password from "../assets/icons/password.png";
 import genders from "../assets/icons/genders.png";
 import back from "../assets/icons/back.png";
-import plus from "../assets/icons/plus.png";
 import attach from "../assets/icons/attach.png";
 // Services Categories :
 import cleaning from "../assets/icons/cleaning.png";
@@ -78,10 +76,8 @@ export default {
   phoneNumber,
   password,
   genders,
-  whatsapp,
   call,
   back,
-  plus,
   attach,
   location,
   cleaning,

@@ -22,7 +22,7 @@ import { icons } from "../../../../constants";
 import { colors } from "../../../../constants/colors";
 import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { customerRoutes } from "../../../../lib/routes";
 
 const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
@@ -257,7 +257,13 @@ export default function ServiceDetail() {
             ) : (
               <View className="items-center justify-center py-12">
                 <Image
-                  source={icons.search}
+                  source={
+                    <Ionicons
+                      name={"search"}
+                      size={20}
+                      color={colors.primary}
+                    />
+                  }
                   className="w-16 h-16 mb-4"
                   tintColor={colors.muted}
                 />
