@@ -16,7 +16,6 @@ import { useGetProvidersByService } from "../../../../../../hooks/useProvider";
 import { icons, images } from "../../../../../../constants";
 import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import CustomButton from "../../../../../../components/ui/CustomButton";
-import useNavigationStore from "../../../../../../zustand/navigationStore";
 import { colors } from "../../../../../../constants/colors";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -29,10 +28,12 @@ import * as Location from "expo-location";
 import { setSelectedLocation } from "../../../../../../store/slices/locationSlice";
 import ProviderCardsSkeleton from "../../../../../../components/skeletons/customer/ProviderCardsSkeleton";
 import { commonRoutes, customerRoutes } from "../../../../../../lib/routes";
+import { useNavigationHistory } from "../../../../../../hooks/useNavigationHistory";
 
 export default function ProvidersOfParticularService() {
   const dispatch = useDispatch();
-  const { service } = useGlobalSearchParams();
+  const { category: categoryId, service } = useGlobalSearchParams();
+  const { push } = useNavigationHistory();
   const pathname = usePathname();
   const selectedLocation = useSelector((state) => state.location.selected);
   const [userLocation, setUserLocation] = useState(null);
@@ -135,19 +136,17 @@ export default function ProvidersOfParticularService() {
       })
     );
     const slug = serviceDetails._id + "-" + provider._id;
-    useNavigationStore.getState().setPreviousRoute(pathname);
-    useNavigationStore.getState().enableBackHandling();
+    push(pathname);
     router.push(customerRoutes.CUSTOMER_BOOK_SERVICE_STEP1(slug));
   };
 
   const navigateToProviderProfile = (providerId) => {
-    useNavigationStore.getState().setPreviousRoute(pathname);
-    useNavigationStore.getState().enableBackHandling();
+    push(pathname);
     router.push(customerRoutes.CUSTOMER_PROVIDER_PROFILE(providerId));
   };
 
   const navigateToMapSelection = () => {
-    useNavigationStore.getState().setPreviousRoute(pathname);
+    push(pathname);
     router.push({
       pathname: commonRoutes.LOCATION_PICKER,
       params: {
@@ -304,7 +303,10 @@ export default function ProvidersOfParticularService() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <TabHeader title="Available Providers" goBack />
+      <TabHeader
+        title="Available Providers"
+        goBack={customerRoutes.CUSTOMER_SERVICES(categoryId)}
+      />
 
       <FlatList
         data={serviceProviders}
@@ -363,7 +365,9 @@ export default function ProvidersOfParticularService() {
               <CustomButton
                 title="Browse Other Services"
                 containerStyles="mt-6 w-full bg-primary"
-                handlePress={() => router.back()}
+                handlePress={() =>
+                  router.replace(customerRoutes.CUSTOMER_SERVICES(categoryId))
+                }
               />
             </View>
           )

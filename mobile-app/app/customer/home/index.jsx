@@ -255,13 +255,7 @@ const CustomerHomePage = () => {
                   </Text>
                 </ScrollView>
                 <Image
-                  source={
-                    <Ionicons
-                      name={"chatbox"}
-                      size={20}
-                      color={colors.primary}
-                    />
-                  }
+                  source={icons.aim}
                   resizeMode="contain"
                   className="w-6 h-6"
                   tintColor={colors.primary}
@@ -269,18 +263,7 @@ const CustomerHomePage = () => {
               </Pressable>
 
               <TouchableOpacity className="items-center justify-center bg-muted-100 min-h-[62px] min-w-[62px] rounded-xl p-2">
-                <Image
-                  source={
-                    <Ionicons
-                      name={"chatbox"}
-                      size={20}
-                      color={colors.primary}
-                    />
-                  }
-                  resizeMode="contain"
-                  className="w-6 h-6"
-                  tintColor={colors.primary}
-                />
+                <Ionicons name={"search"} size={24} color={colors.primary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -314,7 +297,9 @@ const CustomerHomePage = () => {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   activeOpacity={0.3}
-                  onPress={() => customerRoutes.CUSTOMER_SERVICES(item._id)}
+                  onPress={() =>
+                    router.push(customerRoutes.CUSTOMER_SERVICES(item._id))
+                  }
                   className="items-center justify-center"
                 >
                   <View className="w-20 h-20 items-center justify-center bg-muted-100 p-4 rounded-full mb-2">

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { router, useGlobalSearchParams } from "expo-router";
+import { router, useGlobalSearchParams, usePathname } from "expo-router";
 import TabHeader from "../../../../../components/ui/TabHeader";
 import { images, icons } from "../../../../../constants";
 import { colors } from "../../../../../constants/colors";
@@ -31,6 +31,7 @@ import {
   useRemoveFavoriteProvider,
 } from "../../../../../hooks/useCustomer";
 import { customerRoutes } from "../../../../../lib/routes";
+import { useNavigationHistory } from "../../../../../hooks/useNavigationHistory";
 // import { useAddToFavorites, useRemoveFromFavorites, useCheckFavorite } from "../../../../../hooks/useFavorites";
 
 // Dummy reviews data
@@ -71,8 +72,10 @@ const dummyReviews = [
 
 export default function ProviderProfileForCustomer() {
   const dispatch = useDispatch();
+  const pathname = usePathname();
   const [isFavorite, setIsFavorite] = useState(false);
   const { providerId } = useGlobalSearchParams();
+  const { push } = useNavigationHistory();
   const { data, isPending, error } =
     useGetProviderProfileForCustomer(providerId);
 
@@ -169,13 +172,14 @@ export default function ProviderProfileForCustomer() {
       })
     );
     const slug = srv.service._id + "-" + provider._id;
+    push(pathname);
     router.push(customerRoutes.CUSTOMER_BOOK_SERVICE_STEP1(slug));
   };
 
-  const renderContactButton = () => (
+  const renderContactButton = ({ phone }) => (
     <TouchableOpacity
       className="flex-row items-center justify-center bg-primary rounded-lg p-3 mt-4"
-      onPress={() => router.push(`/contact/${providerId}`)}
+      // onPress={() => router.push(`/contact/${providerId}`)}
     >
       <FontAwesome name="whatsapp" size={20} color="white" />
       <Text className="text-white font-psemibold ml-2">Contact Provider</Text>
@@ -336,7 +340,7 @@ export default function ProviderProfileForCustomer() {
               </View>
             </View>
 
-            {renderContactButton()}
+            {renderContactButton(provider.phone)}
           </View>
 
           {/* Key Information Cards */}
@@ -713,7 +717,7 @@ export default function ProviderProfileForCustomer() {
                 Customer Reviews
               </Text>
               <TouchableOpacity
-                onPress={() => router.push(`/provider/${providerId}/reviews`)}
+              // onPress={() => router.push(`/provider/${providerId}/reviews`)}
               >
                 <Text className="text-primary font-pmedium">See All</Text>
               </TouchableOpacity>

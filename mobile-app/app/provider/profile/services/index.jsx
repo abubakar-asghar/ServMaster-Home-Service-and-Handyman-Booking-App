@@ -152,7 +152,10 @@ const ProvidersServices = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <TabHeader title={"My Services"} goBack />
+      <TabHeader
+        title={"My Services"}
+        goBack={providerRoutes.PROVIDER_PROFILE}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         <View className="flex-1 pb-5">
@@ -162,7 +165,7 @@ const ProvidersServices = () => {
               <SearchBar placeholder="Search Services" />
             </View>
             <CustomButton
-              icon={<Ionicons name={"add"} size={20} color={colors.primary} />}
+              icon={<Ionicons name={"add"} size={20} color={"#fff"} />}
               containerStyles="bg-primary w-12 h-12 rounded-lg shadow-sm"
               iconStyles="text-white"
               handlePress={() =>

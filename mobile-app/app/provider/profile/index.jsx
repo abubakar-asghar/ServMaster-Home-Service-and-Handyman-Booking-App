@@ -59,10 +59,10 @@ export default function ProvidersProfile() {
                 {user.accountStatus === "pending"
                   ? "Complete your profile and submit\nthe required documents for verification."
                   : user.accountStatus === "verified"
-                  ? "Your account has been verified.\nPlease wait while it is being activated."
+                  ? "Your account is in active state."
                   : user.accountStatus === "suspended"
                   ? "Your account has been suspended.\nPlease contact support for assistance."
-                  : ""}
+                  : "Your account is in active."}
               </Text>
             </View>
           )}
@@ -105,7 +105,7 @@ export default function ProvidersProfile() {
           {[
             {
               label: "Phone Number",
-              route: providerRoutes.PROVIDER_VERIFICATION_PHONE,
+              route: null,
               icon: icons.phoneNumber,
               status: user?.isPhoneVerified ? "Verified" : "Not Verified",
             },

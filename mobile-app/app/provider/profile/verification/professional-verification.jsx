@@ -13,6 +13,7 @@ import CustomButton from "../../../../components/ui/CustomButton";
 import { router } from "expo-router";
 import { useSelector } from "react-redux";
 import { useVerifyProviderProfessionalInfo } from "../../../../hooks/useProvider";
+import { providerRoutes } from "../../../../lib/routes";
 
 const ProfessionalInformationVerification = () => {
   const { user } = useSelector((state) => state.auth);
@@ -166,7 +167,10 @@ const ProfessionalInformationVerification = () => {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <TabHeader title={"Professional Information"} goBack />
+      <TabHeader
+        title={"Professional Information"}
+        goBack={providerRoutes.PROVIDER_PROFILE}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -340,7 +344,7 @@ const ProfessionalInformationVerification = () => {
             title="Cancel"
             containerStyles="flex-1 bg-secondary"
             textStyles="text-white"
-            handlePress={() => router.back()}
+            handlePress={() => router.replace(providerRoutes.PROVIDER_PROFILE)}
             disabled={isLoading}
           />
           <CustomButton

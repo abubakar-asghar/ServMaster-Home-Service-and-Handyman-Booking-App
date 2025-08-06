@@ -17,10 +17,11 @@ import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../../../../constants/colors";
 import { icons } from "../../../../constants";
 import CustomButton from "../../../../components/ui/CustomButton";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
 import { customerRoutes } from "../../../../lib/routes";
+import { useNavigationHistory } from "../../../../hooks/useNavigationHistory";
 
 const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
@@ -100,7 +101,10 @@ const FavoriteServicesScreen = () => {
 
   return (
     <View className="flex-1 bg-white">
-      <TabHeader title="Favorite Services" goBack />
+      <TabHeader
+        title="Favorite Services"
+        goBack={customerRoutes.CUSTOMER_PROFILE}
+      />
 
       {/* Confirmation Modal */}
       <Modal
@@ -178,17 +182,20 @@ const FavoriteServicesScreen = () => {
 };
 
 const ServiceCard = ({ service, onRemovePress }) => {
+  const pathname = usePathname();
+  const { push } = useNavigationHistory();
   return (
     <TouchableOpacity
       className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100"
-      onPress={() =>
+      onPress={() => {
+        push(pathname);
         router.push(
           customerRoutes.CUSTOMER_PROVIDERS_OF_SERVICE(
             service.parent_service,
             service._id
           )
-        )
-      }
+        );
+      }}
     >
       <View className="flex-row justify-between items-start">
         <View className="flex-row flex-1">

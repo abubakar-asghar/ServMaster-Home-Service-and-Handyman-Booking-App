@@ -53,7 +53,7 @@ const ServicesCategoriesToAdd = () => {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <TabHeader title="Categories" goBack />
+      <TabHeader title="Categories" goBack={providerRoutes.PROVIDER_SERVICES} />
 
       {/* Services Grid */}
       {isPending ? (

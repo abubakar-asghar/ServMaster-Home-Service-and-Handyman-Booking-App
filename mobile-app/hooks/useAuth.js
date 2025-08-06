@@ -17,6 +17,7 @@ export const useLoginUser = () => {
     mutationFn: loginUser,
     mutationKey: ["login-user"],
     onSuccess: (response) => {
+      console.log(response);
       const userData = {
         user: response.data,
         token: response.token,
@@ -26,15 +27,22 @@ export const useLoginUser = () => {
         token: response.token,
       };
 
+      // Save credentials synchronously
       dispatch(setCredentials(userData));
-      saveUserToStorage(storageData);
+      saveUserToStorage(storageData).then(() => {
+        console.log("Storage saved, now navigating...");
 
-      if (response.data.role === "ServiceProvider") {
-        router.replace("/provider/home");
-      } else {
-        router.replace("/customer/home");
-      }
-
+        // Add slight delay to ensure state is updated
+        setTimeout(() => {
+          if (response.data.role === "ServiceProvider") {
+            console.log("Navigating to provider home");
+            router.replace("/provider/home");
+          } else {
+            console.log("Navigating to customer home");
+            router.replace("/customer/home");
+          }
+        }, 100);
+      });
       Alert.alert("Success", response.message);
     },
     onError: (error) => {

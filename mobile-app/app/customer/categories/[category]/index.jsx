@@ -120,7 +120,7 @@ export default function ServiceDetail() {
         opacity: fadeAnim,
       }}
     >
-      <TabHeader title="Services" goBack />
+      <TabHeader title="Services" goBack={customerRoutes.CUSTOMER_CATEGORIES} />
 
       {isPending ? (
         <ScrollView

@@ -19,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import CustomButton from "../../../../../../components/ui/CustomButton";
 import { useAddServices } from "../../../../../../hooks/useProvider";
 import { useSelector } from "react-redux";
+import { providerRoutes } from "../../../../../../lib/routes";
 
 export default function ServiceDetail() {
   const { user } = useSelector((state) => state.auth);
@@ -73,8 +74,7 @@ export default function ServiceDetail() {
     if (!canSubmit) return;
     try {
       await addServices({ category, services: servicesToSubmit });
-      router.back();
-      setTimeout(() => router.back(), 0);
+      router.replace(providerRoutes.PROVIDER_CATEGORIES);
     } catch (error) {
       console.error("Failed to add services:", error);
     }
@@ -83,7 +83,10 @@ export default function ServiceDetail() {
   return (
     <KeyboardAvoidingView className="flex-1 bg-gray-50">
       {/* Header */}
-      <TabHeader title="Select Services" goBack />
+      <TabHeader
+        title="Select Services"
+        goBack={providerRoutes.PROVIDER_CATEGORIES}
+      />
 
       {/* Services List */}
       {servicesLoading ? (
@@ -288,7 +291,9 @@ export default function ServiceDetail() {
             title="Cancel"
             containerStyles="flex-1 bg-gray-100 border border-gray-200"
             textStyles="text-text"
-            handlePress={() => router.back()}
+            handlePress={() =>
+              router.replace(providerRoutes.PROVIDER_CATEGORIES)
+            }
             disabled={addingServices}
           />
           <CustomButton

@@ -8,7 +8,9 @@ const ProfileContentLink = ({ item }) => {
     <TouchableOpacity
       activeOpacity={0.7}
       className="flex-row items-center px-5 py-5"
-      onPress={() => router.push(item.route)}
+      onPress={() => {
+        item.route && router.push(item.route);
+      }}
     >
       <View className="flex-row items-center">
         <Image
@@ -20,7 +22,11 @@ const ProfileContentLink = ({ item }) => {
       </View>
       <View className="flex-row items-center ml-auto gap-2">
         {item.status && (
-          <Text className="text-sm text-error font-pregular">
+          <Text
+            className={`text-sm ${
+              item.status === "Verified" ? "text-success" : "text-error"
+            } font-pregular`}
+          >
             {item.status}
           </Text>
         )}

@@ -3,8 +3,8 @@ import { clearStorage, getUserFromStorage } from "../utils/storage";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 
-const API_BASE_URL = "http://192.168.0.104:5000";
-// const API_BASE_URL = "https://servmaster-backend.vercel.app";
+// const API_BASE_URL = "http://192.168.0.104:5000";
+const API_BASE_URL = "https://servmaster-backend.vercel.app";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

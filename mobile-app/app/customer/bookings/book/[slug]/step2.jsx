@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useState, useEffect } from "react";
-import { router, useGlobalSearchParams } from "expo-router";
+import { router, useGlobalSearchParams, usePathname } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { setBookingInfo } from "../../../../../store/slices/bookingSlice";
 import Stepper from "../../../../../components/booking/Stepper";
@@ -23,6 +23,7 @@ import { customerRoutes } from "../../../../../lib/routes";
 
 export default function Step2() {
   const { slug } = useGlobalSearchParams();
+  const pathname = usePathname();
   const dispatch = useDispatch();
   const selectedLocation = useSelector((state) => state.location.selected);
   const { bookingInfo, providerInfo } = useSelector((state) => state.booking);
@@ -179,7 +180,7 @@ export default function Step2() {
   };
 
   const handlePrevious = () => {
-    router.back();
+    router.replace(customerRoutes.CUSTOMER_BOOK_SERVICE_STEP2(slug));
   };
 
   const handleUseCurrentLocation = async () => {
@@ -287,7 +288,10 @@ export default function Step2() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <TabHeader title="Book Service" goBack={true} />
+      <TabHeader
+        title="Book Service"
+        goBack={pathname.replace("step2", "step1")}
+      />
 
       {/* Stepper */}
       <Stepper currentStep={2} />

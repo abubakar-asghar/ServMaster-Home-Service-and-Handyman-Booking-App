@@ -5,6 +5,7 @@ import FormField from "../../../../components/ui/FormField";
 import CustomButton from "../../../../components/ui/CustomButton";
 import { router } from "expo-router";
 import { useUpdateProviderPassword } from "../../../../hooks/useProvider";
+import { providerRoutes } from "../../../../lib/routes";
 
 const ProviderChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -30,7 +31,10 @@ const ProviderChangePassword = () => {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <TabHeader title={"Change Password"} goBack />
+      <TabHeader
+        title={"Change Password"}
+        goBack={providerRoutes.PROVIDER_PROFILE}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="flex-1 bg-white p-5">
@@ -69,7 +73,7 @@ const ProviderChangePassword = () => {
       <View className="flex-row items-center justify-between p-5 border-t border-t-gray-200">
         <CustomButton
           title={"Go Back"}
-          handlePress={() => router.back()}
+          handlePress={() => router.replace(providerRoutes.PROVIDER_PROFILE)}
           containerStyles={"bg-secondary w-[48%]"}
           disabled={isPending}
         />

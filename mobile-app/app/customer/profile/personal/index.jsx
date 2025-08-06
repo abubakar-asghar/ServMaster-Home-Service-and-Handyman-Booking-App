@@ -17,6 +17,7 @@ import TabHeader from "../../../../components/ui/TabHeader";
 import { useUpdateCustomer } from "../../../../hooks/useCustomer";
 import CustomButton from "../../../../components/ui/CustomButton";
 import FormField from "../../../../components/ui/FormField";
+import { customerRoutes } from "../../../../lib/routes";
 
 const CustomerPersonalDetail = () => {
   const { user } = useSelector((state) => state.auth);
@@ -157,7 +158,10 @@ const CustomerPersonalDetail = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <TabHeader title="Edit Profile" goBack />
+      <TabHeader
+        title="Edit Profile"
+        goBack={customerRoutes.CUSTOMER_PROFILE}
+      />
 
       <ScrollView className="px-5 py-4" showsVerticalScrollIndicator={false}>
         {/* Profile Image Section */}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { SplashScreen, router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserFromStorage } from "../utils/storage";
+import { clearStorage, getUserFromStorage } from "../utils/storage";
 import { setCredentials } from "../store/slices/authSlice";
 import * as Font from "expo-font";
 import { socket } from "../utils/socket";
@@ -16,7 +16,7 @@ const useInitialRedirect = () => {
   const [onboardingDone, setOnboardingDone] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
-  const [tempRoute, setTempRoute] = (useState < string) | (null > null);
+  const [tempRoute, setTempRoute] = useState(null);
   // const { updateLastMessageInChatList, selectedChat, addMessage } =
   //   useChatStore();
   // const queryClient = useQueryClient();
@@ -45,11 +45,6 @@ const useInitialRedirect = () => {
       }
     })();
   }, []);
-
-  // Clear auth storage helper
-  const clearAuthStorage = async () => {
-    await AsyncStorage.multiRemove(["role", "token"]);
-  };
 
   // Check onboarding status and user auth
   useEffect(() => {
@@ -88,12 +83,12 @@ const useInitialRedirect = () => {
               );
             } else {
               // Token is invalid, clear storage and set to login
-              await clearAuthStorage();
+              await clearStorage();
               setTempRoute("/auth/login");
             }
           } catch (error) {
             console.log("Auth verification failed:", error);
-            await clearAuthStorage();
+            await clearStorage();
             setTempRoute("/auth/login");
           }
         } else {

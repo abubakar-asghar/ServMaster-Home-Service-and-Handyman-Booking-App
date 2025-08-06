@@ -23,6 +23,7 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import ProfileImage from "../../../../components/profile/ProfileImage";
 import ProviderBookingDetailsSkeleton from "../../../../components/skeletons/bookings/ProviderBookingDetailsSkeleton";
+import { providerRoutes } from "../../../../lib/routes";
 
 const cancellationReasons = [
   { id: "schedule_conflict", label: "Schedule conflict" },
@@ -201,7 +202,10 @@ const ProviderBookingDetail = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <TabHeader title="Booking Details" goBack />
+      <TabHeader
+        title="Booking Details"
+        goBack={providerRoutes.PROVIDER_BOOKINGS}
+      />
 
       {isPending ? (
         <ProviderBookingDetailsSkeleton />

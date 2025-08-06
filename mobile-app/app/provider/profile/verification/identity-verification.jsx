@@ -19,6 +19,7 @@ import mime from "mime";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useSelector } from "react-redux";
 import { colors } from "../../../../constants/colors";
+import { providerRoutes } from "../../../../lib/routes";
 
 const IdentityVerification = () => {
   const { user } = useSelector((state) => state.auth);
@@ -127,7 +128,10 @@ const IdentityVerification = () => {
 
   return (
     <View className="flex-1 bg-white">
-      <TabHeader title="Professional Information" goBack />
+      <TabHeader
+        title="Professional Information"
+        goBack={providerRoutes.PROVIDER_PROFILE}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="p-5">
@@ -137,7 +141,13 @@ const IdentityVerification = () => {
               <Text className="text-base font-pmedium text-text">
                 Your Photo
               </Text>
-              <Text className="text-red-500 font-pmedium">
+              <Text
+                className={`${
+                  user?.verification?.identity?.status === "verified"
+                    ? "text-success"
+                    : "text-red-500"
+                } font-pmedium`}
+              >
                 {user?.verification?.identity?.status === "verified"
                   ? "Verified"
                   : "Not Verified"}
@@ -177,7 +187,13 @@ const IdentityVerification = () => {
               <Text className="text-base font-pmedium text-text">
                 ID Card (CNIC) Number
               </Text>
-              <Text className="text-red-500 font-pmedium">
+              <Text
+                className={`${
+                  user?.verification?.identity?.status === "verified"
+                    ? "text-success"
+                    : "text-red-500"
+                } font-pmedium`}
+              >
                 {user?.verification?.identity?.status === "verified"
                   ? "Verified"
                   : "Not Verified"}
@@ -257,7 +273,7 @@ const IdentityVerification = () => {
       <View className="flex-row items-center justify-between p-5 border-t border-gray-200">
         <CustomButton
           title="Go Back"
-          handlePress={() => router.back()}
+          handlePress={() => router.replace(providerRoutes.PROVIDER_PROFILE)}
           containerStyles="bg-secondary w-[48%]"
           disabled={isPending}
         />

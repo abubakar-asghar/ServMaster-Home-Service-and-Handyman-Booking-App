@@ -214,11 +214,11 @@ const MessagesScreen = () => {
   if (!selectedChat) {
     return (
       <SafeAreaView className="flex-1 bg-white">
-        <TabHeader title="Chat" goBack />
+        <TabHeader title="Chat" goBack={providerRoutes.PROVIDER_HOME} />
         <View className="flex-1 justify-center items-center">
           <Text className="text-muted">Select a chat to continue</Text>
           <TouchableOpacity
-            onPress={() => router.push(providerRoutes.PROVIDER_CHATS)}
+            onPress={() => router.replace(providerRoutes.PROVIDER_CHATS)}
             className="mt-4 bg-primary px-4 py-2 rounded-lg"
           >
             <Text className="text-white">Back to Chats</Text>
@@ -236,7 +236,7 @@ const MessagesScreen = () => {
             (p) => p.participantType === "Customer"
           )?.user?.fullName || "Chat"
         }
-        goBack
+        goBack={providerRoutes.PROVIDER_CHATS}
       />
 
       <KeyboardAvoidingView

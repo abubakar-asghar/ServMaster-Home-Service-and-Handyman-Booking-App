@@ -10,7 +10,6 @@ export default function ProfileStackLayout() {
         }}
       >
         <Stack.Screen name="index" />
-        <Stack.Screen name="personal-info" title="my info" />
         {/* <Stack.Screen name="business-info" />
       <Stack.Screen name="change-password" />
       <Stack.Screen name="phone-verification" />

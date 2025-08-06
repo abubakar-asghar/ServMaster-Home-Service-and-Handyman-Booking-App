@@ -16,7 +16,7 @@ import FormField from "../../components/ui/FormField";
 import CustomButton from "../../components/ui/CustomButton";
 import { icons, images } from "../../constants";
 import { colors } from "../../constants/colors";
-import Dropdown from "../../components/ui/Dropdown";
+import CustomDropdown from "../../components/ui/CustomDropdown";
 import { commonRoutes } from "../../lib/routes";
 
 const ErrorText = ({ error }) => {
@@ -169,17 +169,24 @@ const ProviderRegister = () => {
           )}
 
           {/* Gender Dropdown */}
-          <Dropdown
-            placeholder="Select Gender"
-            defaultValue={gender}
-            data={[
-              { key: "1", value: "Male" },
-              { key: "2", value: "Female" },
-              { key: "3", value: "Not specified" },
-            ]}
-            onChange={setGender}
-            containerStyles="mt-7"
-          />
+          <View className="mt-5">
+            <CustomDropdown
+              placeholder="Select Gender"
+              selectedValue={gender || ""}
+              options={[
+                // { key: "1", value: "Male" },
+                // { key: "2", value: "Female" },
+                // { key: "3", value: "Prefer not to say" },
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
+                { value: "prefer_not_to_say", label: "Prefer not to say" },
+              ]}
+              onValueChange={(value) => {
+                console.log("Selected", value);
+                setGender(value);
+              }}
+            />
+          </View>
 
           {/* Account Type Dropdown
           <Dropdown
@@ -217,22 +224,22 @@ const ProviderRegister = () => {
           />
 
           {/* Divider */}
-          <View className="flex-row items-center justify-center my-7">
+          {/* <View className="flex-row items-center justify-center my-7">
             <View className="flex-1 h-px bg-gray-300" />
             <Text className="mx-2 text-muted font-pregular text-sm">
               Register using social account
             </Text>
             <View className="flex-1 h-px bg-gray-300" />
-          </View>
+          </View> */}
 
           {/* Social Buttons */}
-          <CustomButton
+          {/* <CustomButton
             title="Continue with Google"
             icon={icons.google}
             handlePress={() => {}}
             isLoading={false}
             containerStyles="bg-primary"
-          />
+          /> */}
 
           {/* Login Redirect */}
           <View className="flex-row justify-center mt-6 mb-4">

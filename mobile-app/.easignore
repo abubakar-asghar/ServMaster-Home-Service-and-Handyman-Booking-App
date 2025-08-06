@@ -1,12 +1,33 @@
-# Exclude directories that are not needed for EAS builds
+# Native directories
+/android
+/ios
+
+# Build and cache directories
 node_modules/
 .expo/
 dist/
-android/
-ios/
-/android
-/ios
-# Exclude common temporary or system files
-*.log
-.env.local
+.temp/
+.cache/
+
+# Environment files
+.env*
+!.env.example
+
+# System files
 .DS_Store
+Thumbs.db
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Expo specific
+.expo-shared/

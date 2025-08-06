@@ -101,7 +101,10 @@ const FavoriteProvidersScreen = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      <TabHeader title="Favorite Providers" goBack />
+      <TabHeader
+        title="Favorite Providers"
+        goBack={customerRoutes.CUSTOMER_PROFILE}
+      />
 
       {/* Confirmation Modal */}
       <Modal

@@ -15,13 +15,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
 import { setSelectedLocation } from "../../store/slices/locationSlice";
 import { router } from "expo-router";
-import useNavigationStore from "../../zustand/navigationStore";
 import { BlurView } from "expo-blur";
+import { useNavigationHistory } from "../../hooks/useNavigationHistory";
 
 export default function LocationPickerScreen() {
   const dispatch = useDispatch();
-  const { previousRoute, clearPreviousRoute, disableBackHandling } =
-    useNavigationStore();
+  const { back } = useNavigationHistory();
 
   const [region, setRegion] = useState(null);
   const [initialRegion, setInitialRegion] = useState(null);

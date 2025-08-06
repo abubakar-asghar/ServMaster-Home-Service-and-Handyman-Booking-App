@@ -56,7 +56,7 @@ const CustomDropdown = ({
   if (!mounted) {
     return (
       <View className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white">
-        <Text className="text-gray-400 font-pmedium">{placeholder}</Text>
+        <Text className="text-muted font-pmedium">{placeholder}</Text>
       </View>
     );
   }
@@ -74,7 +74,7 @@ const CustomDropdown = ({
       >
         <Text
           className={`flex-1 font-pmedium text-base mr-2 ${
-            selectedValue ? "text-text" : "text-gray-400"
+            selectedValue ? "text-text" : "text-muted"
           }`}
           numberOfLines={1}
         >

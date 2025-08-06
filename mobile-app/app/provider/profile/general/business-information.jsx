@@ -21,7 +21,8 @@ import { colors } from "../../../../constants/colors";
 import useNavigationStore from "../../../../zustand/navigationStore";
 import * as ImagePicker from "expo-image-picker";
 import { Image as ExpoImage } from "expo-image";
-import { commonRoutes } from "../../../../lib/routes";
+import { commonRoutes, providerRoutes } from "../../../../lib/routes";
+import { useNavigationHistory } from "../../../../hooks/useNavigationHistory";
 
 const modalStyle = {
   shadowColor: "#000",
@@ -37,6 +38,7 @@ const modalStyle = {
 const ProviderBusinessInfo = () => {
   const pathname = usePathname();
   const { user } = useSelector((state) => state.auth);
+  const { push } = useNavigationHistory();
   const allCitiesOfPakistan = useSelector((state) => state.selectables.cities);
   const allStatesOfPakistan = useSelector((state) => state.selectables.states);
   const selectedLocation = useSelector((state) => state.location.selected);
@@ -432,7 +434,10 @@ const ProviderBusinessInfo = () => {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <TabHeader title={"Business Information"} goBack />
+      <TabHeader
+        title={"Business Information"}
+        goBack={providerRoutes.PROVIDER_PROFILE}
+      />
 
       {!formData ? (
         <View className="flex-1 items-center justify-center">
@@ -620,8 +625,7 @@ const ProviderBusinessInfo = () => {
               <Pressable
                 className="flex-row gap-2 items-center"
                 onPress={() => {
-                  useNavigationStore.getState().setPreviousRoute(pathname);
-                  useNavigationStore.getState().enableBackHandling();
+                  push(pathname);
                   router.push(commonRoutes.LOCATION_PICKER);
                 }}
               >
@@ -840,7 +844,7 @@ const ProviderBusinessInfo = () => {
       <View className="flex-row items-center justify-between p-5 border-t border-t-gray-200">
         <CustomButton
           title={"Go Back"}
-          handlePress={() => router.back()}
+          handlePress={() => router.replace(providerRoutes.PROVIDER_PROFILE)}
           containerStyles={"bg-secondary w-[48%]"}
           disabled={uploading || isPending}
         />

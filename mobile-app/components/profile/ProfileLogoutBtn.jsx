@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 import { clearStorage } from "../../utils/storage";
@@ -14,10 +14,13 @@ const ProfileLogoutBtn = () => {
 
   const handleLogout = async () => {
     setLoading(true);
+    router.replace("/auth/login");
+
     await clearStorage();
     dispatch(logoutUser());
 
-    router.replace("/auth/login");
+    Alert.alert("Success", "Logout Successfully.");
+
     setLoading(false);
   };
 

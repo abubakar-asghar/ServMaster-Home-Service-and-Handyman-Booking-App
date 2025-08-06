@@ -214,7 +214,7 @@ const MessagesScreen = () => {
   if (!selectedChat) {
     return (
       <SafeAreaView className="flex-1 bg-white">
-        <TabHeader title="Chat" goBack />
+        <TabHeader title="Chat" goBack={customerRoutes.CUSTOMER_CHATS} />
         <View className="flex-1 justify-center items-center">
           <Text className="text-muted">Select a chat to continue</Text>
           <TouchableOpacity
@@ -236,7 +236,7 @@ const MessagesScreen = () => {
             (p) => p.participantType === "ServiceProvider"
           )?.user?.fullName || "Service Provider"
         }
-        goBack
+        goBack={customerRoutes.CUSTOMER_CHATS}
       />
 
       <KeyboardAvoidingView
@@ -495,7 +495,7 @@ export default MessagesScreen;
 
 //   return (
 //     <SafeAreaView className="flex-1 bg-white">
-//       <TabHeader title="Chat" goBack />
+//       <TabHeader title="Chat" goBack={customerRoutes.CUSTOMER_CHATS}  />
 
 //       <KeyboardAvoidingView
 //         behavior={Platform.OS === "ios" ? "padding" : undefined}

@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import { useSelector } from "react-redux";
 import { useUpdateProviderPersonalInfo } from "../../../../hooks/useProvider";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
+import { providerRoutes } from "../../../../lib/routes";
 
 const ErrorText = ({ error }) => {
   return (
@@ -96,7 +97,10 @@ const ProviderPersonalInfo = () => {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <TabHeader title={"Personal Information"} goBack />
+      <TabHeader
+        title={"Personal Information"}
+        goBack={providerRoutes.PROVIDER_PROFILE}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="flex-1 bg-white p-5">
@@ -181,7 +185,7 @@ const ProviderPersonalInfo = () => {
       <View className="flex-row items-center justify-between p-5 border-t border-t-gray-200">
         <CustomButton
           title={"Go Back"}
-          handlePress={() => router.back()}
+          handlePress={() => router.replace(providerRoutes.PROVIDER_PROFILE)}
           containerStyles={"bg-secondary w-[48%]"}
         />
         <CustomButton

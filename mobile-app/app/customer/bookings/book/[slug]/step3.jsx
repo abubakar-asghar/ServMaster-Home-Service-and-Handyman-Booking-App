@@ -6,7 +6,6 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { router } from "expo-router";
 import Stepper from "../../../../../components/booking/Stepper";
 import { useSelector } from "react-redux";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
@@ -17,13 +16,18 @@ import { useEffect } from "react";
 import { useCreateBookingRequest } from "../../../../../hooks/useBookings";
 import { colors } from "../../../../../constants/colors";
 import { customerRoutes } from "../../../../../lib/routes";
+import { useNavigationHistory } from "../../../../../hooks/useNavigationHistory";
+import { usePathname } from "expo-router";
 
 export default function Step3() {
+  const pathname = usePathname();
   const { mutateAsync: createBookingRequest, isPending } =
     useCreateBookingRequest();
   const { bookingInfo, serviceInfo, providerInfo } = useSelector(
     (state) => state.booking
   );
+
+  const { back, replace } = useNavigationHistory();
 
   useEffect(() => {
     console.log("Booking Info:", bookingInfo);
@@ -46,7 +50,7 @@ export default function Step3() {
       console.log(data);
 
       await createBookingRequest(data);
-      router.replace(customerRoutes.CUSTOMER_BOOKINGS);
+      replace(customerRoutes.CUSTOMER_BOOKINGS);
     } catch (error) {
       Alert.alert(
         "Booking Error",
@@ -66,7 +70,7 @@ export default function Step3() {
         },
         {
           text: "Yes",
-          onPress: () => router.back(),
+          onPress: () => back(),
         },
       ]
     );
@@ -95,7 +99,10 @@ export default function Step3() {
   return (
     <View className="flex-1 bg-gray-50">
       {/* Header */}
-      <TabHeader title="Confirm Booking" goBack={true} />
+      <TabHeader
+        title="Confirm Booking"
+        goBack={pathname.replace("step3", "step2")}
+      />
 
       {/* Stepper */}
       <View className="px-5 pt-3">

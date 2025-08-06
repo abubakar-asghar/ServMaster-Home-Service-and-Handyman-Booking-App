@@ -182,23 +182,23 @@ const CustomerRegister = () => {
           />
 
           {/* Divider */}
-          <View className="flex-row items-center justify-center my-7">
+          {/* <View className="flex-row items-center justify-center my-7">
             <View className="flex-1 h-px bg-gray-300" />
             <Text className="mx-2 text-muted font-pregular text-sm">
               Register using social account
             </Text>
             <View className="flex-1 h-px bg-gray-300" />
-          </View>
+          </View> */}
 
           {/* Social Buttons */}
 
-          <CustomButton
+          {/* <CustomButton
             title="Continue with Google"
             icon={icons.google}
             handlePress={() => {}}
             isLoading={false}
             containerStyles="bg-primary"
-          />
+          /> */}
 
           {/* <CustomButton
             title="Continue with Facebook"

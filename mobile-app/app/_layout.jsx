@@ -1,59 +1,96 @@
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import "../global.css";
-import store from "../store/store";
+import store, { setCredentials } from "../store/store";
 import queryClient from "../api/queryClient";
-import useInitialRedirect from "../hooks/useInitialRedirect";
-import useNavigationStore from "../zustand/navigationStore";
-import { router } from "expo-router";
-import { BackHandler, View } from "react-native";
-import usePushNotifications from "../hooks/usePushNotifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Font from "expo-font";
+import axiosInstance from "../api/axiosInstance";
+import { View, Text } from "react-native";
+import { clearStorage, getUserFromStorage } from "../utils/storage";
 
 SplashScreen.preventAutoHideAsync();
 
-function Root() {
-  const {
-    previousRoute,
-    backHandlingEnabled,
-    clearPreviousRoute,
-    disableBackHandling,
-  } = useNavigationStore();
-
-  // Initialize push notifications
+function AuthWrapper() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  // Initialize push notifications
-  usePushNotifications(user);
-
-  // Initialize socket when user logs in
   useEffect(() => {
-    if (user?.token) {
-      initializeSocket(user.token);
-    }
-    return () => {
-      disconnectSocket();
-    };
-  }, [user?.token]);
+    const initializeApp = async () => {
+      try {
+        // 1. Load fonts
+        await Font.loadAsync({
+          "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
+          "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
+          "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),
+          "Poppins-ExtraLight": require("../assets/fonts/Poppins-ExtraLight.ttf"),
+          "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
+          "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
+          "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
+          "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
+          "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
+        });
+        setFontsLoaded(true);
 
-  // Android back handler
-  useEffect(() => {
-    const onBackPress = () => {
-      if (backHandlingEnabled && previousRoute) {
-        router.replace(previousRoute);
-        clearPreviousRoute();
-        disableBackHandling();
-        return true;
+        // 2. Check onboarding status
+        const onboardingDone = await AsyncStorage.getItem("onboarding_done");
+
+        console.log(onboardingDone);
+
+        // 3. Check auth status
+        const auth = await getUserFromStorage();
+        console.log(auth);
+
+        if (!auth?.token) {
+          router.replace(
+            onboardingDone === "true" ? "/auth/login" : "/onboarding/step1"
+          );
+          return;
+        }
+
+        // 4. Verify token if exists
+        try {
+          const response = await axiosInstance.get(
+            "/api/auth/verify-logged-in"
+          );
+          if (response.data?.success) {
+            console.log(response.data);
+            dispatch(
+              setCredentials({
+                user: response.data.data,
+                token: auth.token,
+              })
+            );
+            router.replace(
+              auth.role === "Customer" ? "/customer/home" : "/provider/home"
+            );
+          } else {
+            throw new Error("Invalid token");
+          }
+        } catch (error) {
+          await clearStorage();
+          router.replace(
+            onboardingDone === "true" ? "/auth/login" : "/onboarding/step1"
+          );
+        }
+      } catch (error) {
+        console.error("Initialization error:", error);
+        router.replace("/auth/login");
+      } finally {
+        SplashScreen.hideAsync();
       }
-      return false;
     };
-    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-    return () => sub.remove();
-  }, [backHandlingEnabled, previousRoute]);
 
-  useInitialRedirect();
+    initializeApp();
+  }, []);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -65,138 +102,22 @@ function Root() {
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
 
-  // Pre-load any resources while showing splash screen
   useEffect(() => {
-    async function prepare() {
-      try {
-        // Add any async pre-loading here if needed
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Small delay for smoother transition
-      } finally {
-        setAppIsReady(true);
-      }
-    }
-
-    prepare();
+    // Small delay for smoother transition
+    const timer = setTimeout(() => setAppIsReady(true), 500);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!appIsReady) {
-    return null; // Keep splash screen visible
+    return null;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <StatusBar style="dark" />
-        <Root />
+        <AuthWrapper />
       </Provider>
     </QueryClientProvider>
   );
 }
-// import { SplashScreen, Stack } from "expo-router";
-// import { StatusBar } from "expo-status-bar";
-// import { QueryClientProvider } from "@tanstack/react-query";
-// import { Provider } from "react-redux";
-// import { useEffect, useState } from "react";
-// import * as Font from "expo-font";
-// import "../global.css";
-// import store from "../store/store";
-// import queryClient from "../api/queryClient";
-// import useInitialRedirect from "../hooks/useInitialRedirect";
-// import useNavigationStore from "../zustand/navigationStore";
-// import { router } from "expo-router";
-// import { BackHandler } from "react-native";
-
-// SplashScreen.preventAutoHideAsync();
-
-// function Root() {
-//   const {
-//     previousRoute,
-//     backHandlingEnabled,
-//     clearPreviousRoute,
-//     disableBackHandling,
-//   } = useNavigationStore();
-
-//   // Android back handler
-//   useEffect(() => {
-//     const onBackPress = () => {
-//       if (backHandlingEnabled && previousRoute) {
-//         router.replace(previousRoute);
-//         clearPreviousRoute();
-//         disableBackHandling();
-//         return true;
-//       }
-//       return false;
-//     };
-//     const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-//     return () => sub.remove();
-//   }, [backHandlingEnabled, previousRoute]);
-
-//   useInitialRedirect();
-
-//   return (
-//     <Stack screenOptions={{ headerShown: false }}>
-//       <Stack.Screen name="+not-found" />
-//     </Stack>
-//   );
-// }
-
-// export default function RootLayout() {
-//   return (
-//     <QueryClientProvider client={queryClient}>
-//       <Provider store={store}>
-//         <StatusBar style="dark" />
-//         <Root />
-//       </Provider>
-//     </QueryClientProvider>
-//   );
-// }
-
-// export default function RootLayout() {
-//   const [fontsLoaded, error] = useFonts({
-//     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
-//     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
-//     "Poppins-ExtraBold": require("../assets/fonts/Poppins-ExtraBold.ttf"),
-//     "Poppins-ExtraLight": require("../assets/fonts/Poppins-ExtraLight.ttf"),
-//     "Poppins-Light": require("../assets/fonts/Poppins-Light.ttf"),
-//     "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
-//     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
-//     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
-//     "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
-//   });
-
-//   const [showOnboarding, setShowOnboarding] = useState(null);
-
-//   useEffect(() => {
-//     if (error) throw error;
-//     if (fontsLoaded) SplashScreen.hideAsync();
-//   }, [fontsLoaded, error]);
-
-//   useEffect(() => {
-//     const checkOnboarding = async () => {
-//       const value = await AsyncStorage.getItem("onboarding_done");
-//       setShowOnboarding(value === "true");
-//     };
-//     checkOnboarding();
-//   }, []);
-
-//   if (!fontsLoaded || showOnboarding === null) return null;
-
-//   console.log("Onboarding value:", showOnboarding);
-
-//   return (
-//     <>
-//       <QueryClientProvider client={queryClient}>
-//         <Provider store={store}>
-//           <Stack screenOptions={{ headerShown: false }}>
-//             <Stack.Screen
-//               name={showOnboarding ? "index" : "/onboarding/step1"}
-//             />
-//             <Stack.Screen name="+not-found" />
-//           </Stack>
-//         </Provider>
-//       </QueryClientProvider>
-
-//       <StatusBar backgroundColor="#ffffff" style="dark" />
-//     </>
-//   );
-// }
