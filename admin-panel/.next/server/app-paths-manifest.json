@@ -1,7 +1,8 @@
 {
-  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/dashboard/customers/detail/page": "app/dashboard/customers/detail/page.js",
+  "/dashboard/service-providers/all/page": "app/dashboard/service-providers/all/page.js",
+  "/dashboard/services/page": "app/dashboard/services/page.js",
+  "/dashboard/service-categories/page": "app/dashboard/service-categories/page.js",
   "/login/page": "app/login/page.js",
-  "/dashboard/overview/page": "app/dashboard/overview/page.js",
-  "/dashboard/customers/all/page": "app/dashboard/customers/all/page.js",
-  "/dashboard/customers/detail/page": "app/dashboard/customers/detail/page.js"
+  "/dashboard/overview/page": "app/dashboard/overview/page.js"
 }

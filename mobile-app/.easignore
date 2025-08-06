@@ -1,9 +1,12 @@
-# Exclude these to reduce upload size
+# Exclude directories that are not needed for EAS builds
 node_modules/
 .expo/
 dist/
+android/
+ios/
+/android
+/ios
+# Exclude common temporary or system files
 *.log
 .env.local
 .DS_Store
-android/
-ios/
