@@ -42,10 +42,10 @@ export function getServiceCategoryColumns(openModal) {
       ),
     },
     {
-      accessorKey: "created_at",
+      accessorKey: "createdAt",
       header: "Created At",
       cell: ({ row }) =>
-        new Date(row.getValue("created_at")).toLocaleDateString(),
+        new Date(row.getValue("createdAt")).toLocaleDateString(),
     },
     {
       id: "actions",

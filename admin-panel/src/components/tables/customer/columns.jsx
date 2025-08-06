@@ -43,9 +43,9 @@ export const columns = [
     header: "City",
   },
   {
-    accessorKey: "created_at",
+    accessorKey: "createdAt",
     header: "Joined",
-    cell: ({ row }) => format(new Date(row.getValue("created_at")), "PPP"),
+    cell: ({ row }) => format(new Date(row.getValue("createdAt")), "PPP"),
   },
   {
     accessorKey: "lastActive",

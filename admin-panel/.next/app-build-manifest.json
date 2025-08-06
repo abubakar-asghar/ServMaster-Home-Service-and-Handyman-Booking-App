@@ -16,15 +16,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/service-providers/detail/page.js"
     ],
+    "/dashboard/customers/all/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/customers/all/page.js"
+    ],
     "/dashboard/service-providers/all/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/service-providers/all/page.js"
-    ],
-    "/_not-found/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

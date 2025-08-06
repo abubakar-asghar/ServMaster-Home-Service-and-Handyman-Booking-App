@@ -22,11 +22,5 @@ router.post("/resend-verification", resendVerificationCode);
 // Protected routes (require authentication)
 router.get("/verify-logged-in", isAuthenticatedUser, verifyAuth);
 router.put("/save-push-token", isAuthenticatedUser, saveExpoPushToken);
-// router.post("/verify", isAuthenticatedUser, verifyUserPhone);
-// router.post(
-//   "/resend-verification",
-//   isAuthenticatedUser,
-//   resendVerificationCode
-// );
 
 export default router;

@@ -1,5 +1,5 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/dashboard/service-providers/detail/page": "app/dashboard/service-providers/detail/page.js",
-  "/dashboard/service-providers/all/page": "app/dashboard/service-providers/all/page.js"
+  "/dashboard/customers/all/page": "app/dashboard/customers/all/page.js",
+  "/dashboard/service-providers/all/page": "app/dashboard/service-providers/all/page.js",
+  "/dashboard/service-providers/detail/page": "app/dashboard/service-providers/detail/page.js"
 }
