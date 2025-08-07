@@ -7,6 +7,7 @@ export const useNavigationHistory = () => {
 
   const push = (path) => {
     history.current.push(path);
+    console.log(history.current)
   };
 
   const clear = () => {
@@ -24,6 +25,7 @@ export const useNavigationHistory = () => {
   };
 
   const back = () => {
+    console.log(history.current)
     if (history.current.length > 1) {
       history.current.pop(); // Remove current route
       const previousRoute = history.current[history.current.length - 1];

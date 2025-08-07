@@ -165,6 +165,7 @@ export default function LocationPickerScreen() {
     }
 
     try {
+      console.log("confriming...")
       setIsConfirming(true);
       dispatch(
         setSelectedLocation({
@@ -175,9 +176,8 @@ export default function LocationPickerScreen() {
           state: address?.region || "Unknown",
         })
       );
-      router.replace(previousRoute || "/");
-      clearPreviousRoute();
-      disableBackHandling();
+
+      back();
     } finally {
       setIsConfirming(false);
     }

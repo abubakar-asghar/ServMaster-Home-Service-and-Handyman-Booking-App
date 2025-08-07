@@ -26,9 +26,8 @@ const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
 export default function Step1() {
   const { slug } = useGlobalSearchParams();
-  const ids = slug.split("-");
-  const serviceId = ids[0];
-  const providerId = ids[1];
+  const ids = slug.includes("-") ? slug.split("-") : slug;
+  const providerId = Array.isArray(ids) ? ids[1] : ids;
   const dispatch = useDispatch();
   const { bookingInfo } = useSelector((state) => state.booking);
   const { user } = useSelector((state) => state.auth);
