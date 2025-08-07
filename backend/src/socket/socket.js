@@ -82,6 +82,11 @@ io.on("connection", (socket) => {
   // Message handler
   socket.on("sendMessage", async (messageData) => {
     try {
+      if (messageData.tempId) {
+        const exists = await Message.exists({ _id: messageData.tempId });
+        if (exists) return; // Prevent duplicate processing
+      }
+
       const { chatId, content } = messageData;
 
       // Verify chat exists and user is participant
@@ -116,7 +121,11 @@ io.on("connection", (socket) => {
       });
 
       // Emit to all chat participants
-      io.to(chatId).emit("newMessage", savedMessage);
+      io.to(chatId).emit("newMessage", {
+        ...savedMessage.toObject(),
+        source: "server",
+        tempId: messageData.tempId,
+      });
 
       // Emit notification to other participants who aren't in the chat
       chat.participants.forEach((participant) => {
