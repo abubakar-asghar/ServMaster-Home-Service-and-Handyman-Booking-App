@@ -25,6 +25,8 @@ import {
   getAllReviews,
   getReviewStats,
   deleteReview,
+  updateCustomerPhoneVerification,
+  updateCustomerBlockStatus,
 } from "../controllers/admin.controllers.js";
 import {
   isAuthenticatedAdmin,
@@ -47,6 +49,16 @@ router.get("/dashboard/statistics", getDashboardStatistics);
 
 ////////////////////////// ---- CUSTOMERS ROUTES ---- //////////////////////////
 router.get("/customers", isAuthenticatedAdmin, getAllCustomers);
+router.put(
+  "/customer/:id/phone-verification",
+  isAuthenticatedAdmin,
+  updateCustomerPhoneVerification
+);
+router.put(
+  "/customer/:id/block-unblock",
+  isAuthenticatedAdmin,
+  updateCustomerBlockStatus
+);
 router
   .route("/customer/:id")
   .get(isAuthenticatedAdmin, getCustomerDetails)

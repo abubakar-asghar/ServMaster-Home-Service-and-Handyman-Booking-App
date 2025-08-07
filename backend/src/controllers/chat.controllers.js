@@ -198,6 +198,8 @@ export const sendMessageWithSocket = (io) =>
       serviceRequest: chat.activeServiceRequest,
     });
 
+    console.log(message)
+
     // Update chat
     chat.messages.push(message._id);
     chat.lastMessage = message._id;

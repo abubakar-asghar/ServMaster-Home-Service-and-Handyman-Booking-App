@@ -1,68 +1,95 @@
+// socket/socket.js
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 import Message from "../models/message.model.js";
 import Chat from "../models/chat.model.js";
 import ServiceProvider from "../models/serviceProvider.model.js";
+import Customer from "../models/customer.model.js";
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "*", // Update with your client origin in production
+    origin: "*",
     methods: ["GET", "POST"],
   },
   connectionStateRecovery: {
-    maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes recovery window
+    maxDisconnectionDuration: 2 * 60 * 1000,
     skipMiddlewares: true,
   },
 });
 
-// Track connected users (both customers and providers)
 const connectedUsers = new Map();
-
 app.set("io", io);
 
-// Socket Logic
+// 🔁 Reusable helper to set online status
+const setUserOnlineStatus = async (userId, userType) => {
+  if (userType === "ServiceProvider") {
+    return await ServiceProvider.findByIdAndUpdate(userId, {
+      onlineStatus: "online",
+    });
+  } else if (userType === "Customer") {
+    return await Customer.findByIdAndUpdate(userId, {
+      onlineStatus: "online",
+    });
+  }
+};
+
+// 🔁 Reusable helper to set offline status
+const setUserOfflineStatus = async (userId, userType) => {
+  if (userType === "ServiceProvider") {
+    return await ServiceProvider.findByIdAndUpdate(userId, {
+      onlineStatus: "offline",
+      lastSeen: new Date(),
+    });
+  } else if (userType === "Customer") {
+    return await Customer.findByIdAndUpdate(userId, {
+      onlineStatus: "offline",
+      lastSeen: new Date(),
+    });
+  }
+};
+
+// ✅ Socket Logic
 io.on("connection", (socket) => {
   console.log("⚡ New socket connection:", socket.id);
 
-  // Authenticate connection
-  socket.on("authenticate", async ({ userId, token }) => {
+  socket.on("authenticate", async ({ userId, token, userType }) => {
     try {
-      // Here you would verify the token (JWT verification)
-      // For now we'll just store the user ID
       connectedUsers.set(userId, socket.id);
       socket.userId = userId;
-      console.log(`🔐 User ${userId} authenticated`);
+      socket.userType = userType;
+
+      const user = await setUserOnlineStatus(userId, userType);
+      console.log(`🔐 ${userType} ${userId} is online`);
+
+      // Notify clients (e.g. for real-time status update)
+      io.emit("userStatusChanged", {
+        userId,
+        userType,
+        status: "online",
+      });
     } catch (error) {
       console.error("Authentication error:", error);
       socket.disconnect();
     }
   });
 
-  // Join chat room handler
   socket.on("joinChat", async (chatId) => {
     try {
-      // Verify user has access to this chat
       const chat = await Chat.findById(chatId);
-      if (!chat || !socket.userId) {
-        throw new Error("Unauthorized chat access");
-      }
+      if (!chat || !socket.userId) throw new Error("Unauthorized chat access");
 
-      // Check if user is participant
       const isParticipant = chat.participants.some(
         (p) => p.user.toString() === socket.userId
       );
-
-      if (!isParticipant) {
-        throw new Error("User is not a chat participant");
-      }
+      if (!isParticipant) throw new Error("User is not a chat participant");
 
       socket.join(chatId);
       console.log(`💬 User ${socket.userId} joined chat ${chatId}`);
 
-      // Mark messages as seen when joining
       await Message.updateMany(
         {
           chat: chatId,
@@ -72,93 +99,69 @@ io.on("connection", (socket) => {
         { $set: { seen: true } }
       );
 
-      // Notify other participants that messages were seen
       socket.to(chatId).emit("messagesSeen", { chatId });
     } catch (error) {
       console.error("Error joining chat:", error.message);
     }
   });
 
-  // Message handler
   socket.on("sendMessage", async (messageData) => {
     try {
-      if (messageData.tempId) {
-        const exists = await Message.exists({ _id: messageData.tempId });
-        if (exists) return; // Prevent duplicate processing
-      }
+      console.log(messageData)
 
       const { chatId, content } = messageData;
 
-      // Verify chat exists and user is participant
       const chat = await Chat.findById(chatId);
-      if (!chat || !socket.userId) {
-        throw new Error("Invalid chat or unauthorized");
-      }
+      if (!chat || !socket.userId) throw new Error("Invalid chat");
 
       const isParticipant = chat.participants.some(
         (p) => p.user.toString() === socket.userId
       );
+      if (!isParticipant) throw new Error("Unauthorized");
 
-      if (!isParticipant) {
-        throw new Error("User is not a chat participant");
-      }
-
-      // Create and save message
       const newMessage = new Message({
         chat: chatId,
         sender: socket.userId,
-        senderType: content.senderType, // "Customer" or "ServiceProvider"
+        senderType: content.senderType,
         text: content.text,
+        serviceRequest: chat.activeServiceRequest,
         seen: false,
       });
 
       const savedMessage = await newMessage.save();
 
-      // Update chat's last message
       await Chat.findByIdAndUpdate(chatId, {
         lastMessage: savedMessage._id,
         updatedAt: new Date(),
       });
 
-      // Emit to all chat participants
       io.to(chatId).emit("newMessage", {
         ...savedMessage.toObject(),
         source: "server",
         tempId: messageData.tempId,
       });
 
-      // Emit notification to other participants who aren't in the chat
       chat.participants.forEach((participant) => {
         if (participant.user.toString() !== socket.userId) {
-          io.to(connectedUsers.get(participant.user.toString()))?.emit(
-            "newMessageNotification",
-            {
+          const targetSocketId = connectedUsers.get(
+            participant.user.toString()
+          );
+          if (targetSocketId) {
+            io.to(targetSocketId).emit("newMessageNotification", {
               chatId,
               message: savedMessage,
-            }
-          );
+            });
+          }
         }
       });
 
-      console.log(`📩 Message sent to chat ${chatId} by ${socket.userId}`);
+      console.log(`📩 Message sent in chat ${chatId} by ${socket.userId}`);
     } catch (error) {
       console.error("Error sending message:", error.message);
       socket.emit("messageError", { error: error.message });
     }
   });
 
-  // Message received acknowledgment
-  socket.on("messageReceived", async ({ chatId, messageId }) => {
-    try {
-      await Message.findByIdAndUpdate(messageId, {
-        receivedAt: new Date(),
-      });
-    } catch (error) {
-      console.error("Error updating message receipt:", error);
-    }
-  });
-
-  // Message seen handler
   socket.on("markMessagesAsSeen", async ({ chatId }) => {
     try {
       await Message.updateMany(
@@ -169,42 +172,35 @@ io.on("connection", (socket) => {
         },
         { $set: { seen: true, seenAt: new Date() } }
       );
-
-      // Notify other participants
       socket.to(chatId).emit("messagesSeen", { chatId });
     } catch (error) {
       console.error("Error marking messages as seen:", error);
     }
   });
 
-  // Disconnection handler
   socket.on("disconnect", async () => {
-    console.log("🚪 User disconnected:", socket.id);
+    console.log("🚪 Disconnected:", socket.id);
 
     if (socket.userId) {
       connectedUsers.delete(socket.userId);
 
-      // For providers, update online status
-      if (socket.userType === "ServiceProvider") {
-        try {
-          await ServiceProvider.findByIdAndUpdate(socket.userId, {
-            onlineStatus: "offline",
-            lastSeen: new Date(),
-          });
+      try {
+        await setUserOfflineStatus(socket.userId, socket.userType);
+        console.log(`🔌 ${socket.userType} ${socket.userId} is offline`);
 
-          io.emit("providerStatusChanged", {
-            providerId: socket.userId,
-            status: "offline",
-          });
-        } catch (error) {
-          console.error("Error updating provider status:", error);
-        }
+        io.emit("userStatusChanged", {
+          userId: socket.userId,
+          userType: socket.userType,
+          status: "offline",
+        });
+      } catch (error) {
+        console.error("Error setting offline status:", error);
       }
     }
   });
 });
 
-// Health Check Endpoint
+// Health Check
 app.get("/socket-health", (req, res) => {
   res.status(200).json({
     status: "healthy",
@@ -213,7 +209,6 @@ app.get("/socket-health", (req, res) => {
   });
 });
 
-// Helper functions
 export const getOnlineUsers = () => {
   return Array.from(connectedUsers.keys());
 };
@@ -223,6 +218,7 @@ export const isUserOnline = (userId) => {
 };
 
 export { app, io, server };
+
 // import { Server } from "socket.io";
 // import http from "http";
 // import express from "express";

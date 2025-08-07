@@ -67,6 +67,11 @@ const customerSchema = new mongoose.Schema(
       required: true,
       default: "Customer",
     },
+    onlineStatus: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    },
     expoPushToken: {
       type: String,
       default: null,

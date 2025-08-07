@@ -626,6 +626,85 @@ export const getCustomerDetails = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Update Customer Phone Verification Status
+ * @route   PUT /api/admin/customer/:id/phone-verification
+ * @access  Private (Admin)
+ */
+export const updateCustomerPhoneVerification = asyncHandler(
+  async (req, res, next) => {
+    const { isPhoneVerified } = req.body;
+    if (typeof isPhoneVerified !== "boolean") {
+      return next(new ErrorHandler(400, "isPhoneVerified must be a boolean"));
+    }
+
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      return next(new ErrorHandler(404, "Customer not found"));
+    }
+
+    customer.isPhoneVerified = isPhoneVerified;
+
+    if (customer.isPhoneVerified === true) {
+      customer.isBlocked = false;
+      customer.blockedReason = null;
+      customer.blockedAt = null;
+    }
+
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Customer phone verification status updated",
+      data: {
+        _id: customer._id,
+        isPhoneVerified: customer.isPhoneVerified,
+      },
+    });
+  }
+);
+
+/**
+ * @desc    Update Customer Block/Unblock Status
+ * @route   PUT /api/admin/customer/:id/block-unblock
+ * @access  Private (Admin)
+ */
+export const updateCustomerBlockStatus = asyncHandler(
+  async (req, res, next) => {
+    const { blockStatus } = req.body;
+    if (typeof blockStatus !== "boolean") {
+      return next(new ErrorHandler(400, "blockStatus must be a boolean"));
+    }
+
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      return next(new ErrorHandler(404, "Customer not found"));
+    }
+
+    customer.isBlocked = blockStatus;
+    if (blockStatus) {
+      customer.blockedReason = "Blocked by admin for policy violation";
+      customer.blockedAt = new Date();
+    } else {
+      customer.blockedReason = null;
+      customer.blockedAt = null;
+    }
+
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Customer ${blockStatus ? "blocked" : "unblocked"} successfully`,
+      data: {
+        _id: customer._id,
+        isBlocked: customer.isBlocked,
+        blockedReason: customer.blockedReason,
+        blockedAt: customer.blockedAt,
+      },
+    });
+  }
+);
+
+/**
  * @desc    Delete Customer
  * @route   DELETE /api/admin/customer/:id
  * @access  Private (Admin)
