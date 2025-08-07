@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useGetAllServiceProviders } from "../../../../hooks/useProvider";
-import { columns } from "../../../../components/tables/service-provider/columns";
+import { getServiceProvidersColumns } from "../../../../components/tables/service-provider/columns";
 import DataTable from "../../../../components/tables/service-provider/data-table";
 import { Button } from "../../../../components/ui/button";
 import { TableSkeleton } from "../../../../components/tables/skeleton/TableSkeleton";
@@ -15,7 +15,7 @@ const AllServiceProviders = () => {
     return <div className="p-4 text-red-500">Error loading providers</div>;
 
   const providers = data?.data || [];
-
+  const columns = getServiceProvidersColumns();
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">

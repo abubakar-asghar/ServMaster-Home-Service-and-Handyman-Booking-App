@@ -54,7 +54,7 @@ const DataTable = ({ columns, data }) => {
           <Button variant="outline" size="sm">
             Export
           </Button>
-          <Button size="sm">Add Provider</Button>
+          <Button size="sm">Add Customer</Button>
         </div>
       </div>
 

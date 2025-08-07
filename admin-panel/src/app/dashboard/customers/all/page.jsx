@@ -1,20 +1,34 @@
 "use client";
 
 import React from "react";
-import { useGetAllCustomers } from "../../../../hooks/useCustomer";
-import { columns } from "../../../../components/tables/customer/columns";
+import {
+  useGetAllCustomers,
+  useUpdateCustomerBlockStatus,
+  useUpdateCustomerPhoneVerification,
+} from "../../../../hooks/useCustomer";
+import { getCustomerColumns } from "../../../../components/tables/customer/columns";
 import DataTable from "../../../../components/tables/customer/data-table";
 import { Button } from "../../../../components/ui/button";
 import { TableSkeleton } from "../../../../components/tables/skeleton/TableSkeleton";
 
 const AllCustomers = () => {
-  const { data, isPending, error } = useGetAllCustomers();
+  const { data, isPending, error, refetch } = useGetAllCustomers();
+
+  const { mutateAsync: updatePhoneStatus } =
+    useUpdateCustomerPhoneVerification();
+  const { mutateAsync: updateBlockStatus } = useUpdateCustomerBlockStatus();
 
   if (isPending) return <TableSkeleton />;
   if (error)
     return <div className="p-4 text-red-500">Error loading customers</div>;
 
   const customers = data?.data || [];
+
+  const columns = getCustomerColumns(
+    updatePhoneStatus,
+    updateBlockStatus,
+    refetch
+  );
 
   return (
     <div className="p-6 space-y-4">
