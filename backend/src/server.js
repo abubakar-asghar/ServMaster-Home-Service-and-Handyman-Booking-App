@@ -57,6 +57,10 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
+app.get("/", (req, res) => {
+  res.send("Server is running.");
+});
+
 // Start Server
 server.listen(process.env.PORT || 5000, () => {
   console.log(`🚀 Server listening on http://localhost:${process.env.PORT}`);
