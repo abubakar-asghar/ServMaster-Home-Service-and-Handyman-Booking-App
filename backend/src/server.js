@@ -1,6 +1,7 @@
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
+import "./jobs/autoCancelBooking.js";
 
 // Load environment variables
 dotenv.config({ path: "src/.env" });
