@@ -20,8 +20,8 @@ export const customerRoutes = {
     `/customer/categories/${categoryId}/${serviceId}/providers`,
 
   // Customer Chat Routes
-  CUSTOMER_CHATS: "/customer/chats",
-  CUSTOMER_CHAT_MESSAGES: (chatId) => `/customer/chats/${chatId}`,
+  CUSTOMER_CHATS: "/customer/chat",
+  CUSTOMER_CHAT_MESSAGES: (chatId) => `/customer/chat/${chatId}`,
 
   // Customer Profile Routes
   CUSTOMER_PROFILE: "/customer/profile",
@@ -48,7 +48,7 @@ export const providerRoutes = {
   PROVIDER_BOOKING_DETAILS: (bookingId) => `/provider/bookings/${bookingId}`,
 
   // Customer Chat Routes
-  PROVIDER_CHATS: "/provider/chats",
+  PROVIDER_CHATS: "/provider/chat",
   PROVIDER_CHAT_MESSAGES: (chatId) => `/provider/chat/${chatId}`,
 
   // Provider Profile Routes

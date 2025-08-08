@@ -17,7 +17,7 @@ import { getProviderDashboardStats } from "../../../api/services/providerApi";
 import { useEffect, useState } from "react";
 import ProviderHomeSkeleton from "../../../components/skeletons/home/ProviderHomeSkeleton";
 import { providerRoutes } from "../../../lib/routes";
-import { scheduleNotificationAsync } from "expo-notifications";
+// import { scheduleNotificationAsync } from "expo-notifications";
 
 const StatsCard = ({ count, icon, label, onPress, color = colors.primary }) => (
   <TouchableOpacity
@@ -181,7 +181,7 @@ const ProviderDashboardPage = () => {
               Here's what's happening today
             </Text>
 
-            <Pressable
+            {/* <Pressable
               onPress={() => {
                 console.log("Testing notification");
                 scheduleNotificationAsync({
@@ -196,7 +196,7 @@ const ProviderDashboardPage = () => {
               <Text className="text-gray-500 font-pregular text-xs mt-1">
                 Test Notification
               </Text>
-            </Pressable>
+            </Pressable> */}
           </View>
 
           {/* Stats Overview */}

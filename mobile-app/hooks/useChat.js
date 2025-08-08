@@ -83,24 +83,12 @@ export const useSendMessageWithSocket = () => {
 
   return useMutation({
     mutationFn: async ({ chatId, content }) => {
-      // Optimistically update UI
-      const tempId = Date.now().toString();
-      const optimisticMessage = {
-        _id: tempId,
-        chat: chatId,
-        text: content.text,
-        createdAt: new Date().toISOString(),
-        sender: content.sender,
-        senderType: content.senderType,
-        seen: false,
-      };
-      addMessage(optimisticMessage);
-
       // Send via socket
       const response = await sendMessageWithSocket({ chatId, content });
 
       // Replace optimistic message with real one
       if (response.data) {
+        console.log(response.data);
         addMessage(response.data);
       }
       return response;

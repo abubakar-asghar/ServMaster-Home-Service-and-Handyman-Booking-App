@@ -1,32 +1,32 @@
+// utils/socket.js
 import { io } from "socket.io-client";
-import { useChatStore } from "../zustand/chatStore";
+import { getUserFromStorage } from "./storage";
 
 let socket;
 
-export const initializeSocket = (token) => {
-  if (!socket) {
-    socket = io("http://192.168.0.104:5000", {
-      autoConnect: false,
+export const initSocket = async () => {
+  const auth = await getUserFromStorage();
+  const { user, token } = auth ? auth : {};
+
+  if (!socket && user && token) {
+    socket = io("http://192.168.0.106:5000", {
       transports: ["websocket"],
-      auth: { token },
     });
 
-    // Connect the socket
-    socket.connect();
+    socket.on("connect", () => {
+      console.log("✅ Socket connected", socket.id);
 
-    // Set up global event listeners
-    const { addMessage, markMessagesAsSeen } = useChatStore.getState();
-
-    socket.on("newMessage", (message) => {
-      addMessage(message);
+      // Emit authentication for ALL users (Customer or ServiceProvider)
+      socket.emit("authenticate", {
+        userId: user._id,
+        token,
+        userType: user.role, // "Customer" or "ServiceProvider"
+      });
     });
 
-    socket.on("messageSeen", ({ chatId }) => {
-      markMessagesAsSeen(chatId);
-    });
-
-    socket.on("connect_error", (err) => {
-      console.log("Socket connection error:", err.message);
+    socket.on("userStatusChanged", ({ userId, userType, status }) => {
+      console.log(`🔄 ${userType} ${userId} is now ${status}`);
+      // You can dispatch a redux/zustand update here
     });
   }
 
@@ -41,10 +41,54 @@ export const disconnectSocket = () => {
     socket = null;
   }
 };
+
+// import { io } from "socket.io-client";
+// import { useChatStore } from "../zustand/chatStore";
+
+// let socket;
+
+// export const initializeSocket = (token) => {
+//   if (!socket) {
+//     socket = io("http://192.168.0.106:5000", {
+//       autoConnect: false,
+//       transports: ["websocket"],
+//       auth: { token },
+//     });
+
+//     // Connect the socket
+//     socket.connect();
+
+//     // Set up global event listeners
+//     const { addMessage, markMessagesAsSeen } = useChatStore.getState();
+
+//     socket.on("newMessage", (message) => {
+//       addMessage(message);
+//     });
+
+//     socket.on("messageSeen", ({ chatId }) => {
+//       markMessagesAsSeen(chatId);
+//     });
+
+//     socket.on("connect_error", (err) => {
+//       console.log("Socket connection error:", err.message);
+//     });
+//   }
+
+//   return socket;
+// };
+
+// export const getSocket = () => socket;
+
+// export const disconnectSocket = () => {
+//   if (socket) {
+//     socket.disconnect();
+//     socket = null;
+//   }
+// };
 // import { io } from "socket.io-client";
 
 // // ✅ Replace with your actual backend URL (adjust for LAN/production)
-// export const socket = io("http://192.168.0.104:5000", {
+// export const socket = io("http://192.168.0.106:5000", {
 //   autoConnect: false, // Don't connect immediately — connect only after login
 //   transports: ["websocket"],
 //   withCredentials: true,
@@ -57,7 +101,7 @@ export const disconnectSocket = () => {
 // const SOCKET_URL =
 //   Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://localhost:3000";
 
-// export const socket = io("http://192.168.0.104:5000", {
+// export const socket = io("http://192.168.0.106:5000", {
 //   autoConnect: false, // We'll manually connect
 //   reconnectionAttempts: 5,
 //   reconnectionDelay: 1000,

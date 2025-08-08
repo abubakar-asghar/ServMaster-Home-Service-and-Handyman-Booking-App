@@ -9,9 +9,18 @@ import { icons } from "../../../constants";
 import ChatSkeleton from "../../../components/skeletons/chat/ChatSkeleton";
 import { useChatStore } from "../../../zustand/chatStore";
 import { providerRoutes } from "../../../lib/routes";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const ProviderChat = () => {
-  const { chats, setChats, selectedChat, setSelectedChat } = useChatStore();
+  const {
+    chats,
+    setChats,
+    selectedChat,
+    setSelectedChat,
+    onlineUsers,
+    isConnected,
+  } = useChatStore();
+
   const { data, isPending: isLoadingChats, error } = useGetAllProviderChats();
 
   const handleSelectChat = (chat) => {
@@ -29,6 +38,15 @@ const ProviderChat = () => {
     <View className="flex-1 bg-white">
       {/* Header */}
       <TabHeader title="Chat" />
+
+      {/* Connection Status */}
+      {!isConnected && (
+        <View className="bg-yellow-50 p-2 border-b border-yellow-200">
+          <Text className="text-yellow-700 text-center text-sm">
+            Connecting to chat service...
+          </Text>
+        </View>
+      )}
 
       {/* Loading */}
       {isLoadingChats ? (
@@ -80,6 +98,7 @@ const ProviderChat = () => {
                   const participant = chat.participants.find(
                     (p) => p.participantType === "Customer"
                   )?.user;
+                  const isOnline = onlineUsers.has(participant?._id);
 
                   return (
                     <TouchableOpacity
@@ -88,28 +107,37 @@ const ProviderChat = () => {
                       activeOpacity={0.7}
                       onPress={() => handleSelectChat(chat)}
                     >
-                      <Image
-                        source={
-                          participant?.profilePic
-                            ? { uri: participant.profilePic }
-                            : icons.profile
-                        }
-                        className="w-14 h-14 rounded-full mr-4"
-                        resizeMode="cover"
-                      />
+                      <View className="relative">
+                        <Image
+                          source={
+                            participant?.profilePic
+                              ? { uri: participant.profilePic }
+                              : icons.profile
+                          }
+                          className="w-14 h-14 rounded-full mr-4"
+                          resizeMode="cover"
+                        />
+                        {isOnline && (
+                          <View className="absolute bottom-0 right-4 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                        )}
+                      </View>
                       <View className="flex-1">
                         <View className="flex-row justify-between items-center mb-1">
-                          <Text className="text-text font-psemibold text-base">
-                            {participant?.fullName || "Customer"}
-                          </Text>
+                          <View className="flex-row items-center">
+                            <Text className="text-text font-psemibold text-base">
+                              {participant?.fullName || "Customer"}
+                            </Text>
+                            {isOnline && (
+                              <Text className="text-green-500 text-xs ml-2">
+                                • Online
+                              </Text>
+                            )}
+                          </View>
                           <Text className="text-muted text-xs">
-                            {new Date(chat.updatedAt)
-                              .toLocaleTimeString("en-GB", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              })
-                              .toUpperCase()}
+                            {new Date(chat.updatedAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </Text>
                         </View>
                         <View className="flex-row justify-between items-center">
@@ -123,9 +151,21 @@ const ProviderChat = () => {
                           >
                             {chat.lastMessage?.text || "Start chatting..."}
                           </Text>
-                          {!chat.lastMessage?.seen && (
-                            <View className="w-3 h-3 rounded-full bg-primary ml-2" />
-                          )}
+                          <View className="flex-row items-center ml-2">
+                            {chat.lastMessage?.sender === participant?._id && (
+                              <MaterialIcons
+                                name={
+                                  chat.lastMessage?.seen ? "done-all" : "done"
+                                }
+                                size={14}
+                                color={colors.primary}
+                              />
+                            )}
+                            {!chat.lastMessage?.seen &&
+                              chat.lastMessage?.sender !== participant?._id && (
+                                <View className="w-2.5 h-2.5 rounded-full bg-primary" />
+                              )}
+                          </View>
                         </View>
                       </View>
                     </TouchableOpacity>

@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../store/slices/authSlice";
 import { saveUserToStorage } from "../utils/storage";
 import { router } from "expo-router";
+import axiosInstance from "../api/axiosInstance";
 
 export const useLoginUser = () => {
   const dispatch = useDispatch();
@@ -22,27 +23,19 @@ export const useLoginUser = () => {
         user: response.data,
         token: response.token,
       };
-      const storageData = {
-        role: response.data?.role,
-        token: response.token,
-      };
 
       // Save credentials synchronously
       dispatch(setCredentials(userData));
-      saveUserToStorage(storageData).then(() => {
-        console.log("Storage saved, now navigating...");
 
-        // Add slight delay to ensure state is updated
-        setTimeout(() => {
-          if (response.data.role === "ServiceProvider") {
-            console.log("Navigating to provider home");
-            router.replace("/provider/home");
-          } else {
-            console.log("Navigating to customer home");
-            router.replace("/customer/home");
-          }
-        }, 100);
-      });
+      // Add slight delay to ensure state is updated
+      setTimeout(() => {
+        if (response.data.role === "ServiceProvider") {
+          router.replace("/provider/home");
+        } else {
+          console.log("Navigating to customer home");
+          router.replace("/customer/home");
+        }
+      }, 100);
       Alert.alert("Success", response.message);
     },
     onError: (error) => {
@@ -81,5 +74,26 @@ export const useVerifyUserPhone = () => {
 export const useResendVerification = () => {
   return useMutation({
     mutationFn: resendVerificationCode,
+  });
+};
+
+export const useVerifyAuth = () => {
+  const dispatch = useDispatch();
+
+  return useMutation({
+    mutationFn: async (token) => {
+      const response = await axiosInstance.get("/api/auth/verify-logged-in");
+      return response.data;
+    },
+    onSuccess: (response, { token }) => {
+      console.log(response, token);
+      dispatch(
+        setCredentials({
+          user: response.data.data,
+          token: token,
+        })
+      );
+    },
+    onError: () => {},
   });
 };

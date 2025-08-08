@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
-export const saveUserToStorage = async ({ role, token }) => {
-  await SecureStore.setItemAsync("auth", JSON.stringify({ role, token }));
+export const saveUserToStorage = async ({ user, token }) => {
+  await SecureStore.setItemAsync("auth", JSON.stringify({ user, token }));
 };
 
 export const getUserFromStorage = async () => {

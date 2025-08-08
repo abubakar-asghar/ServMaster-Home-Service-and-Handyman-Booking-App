@@ -69,7 +69,7 @@ export const useUpdateProviderPersonalInfo = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -91,7 +91,7 @@ export const useUpdateProviderBusinessInfo = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -129,7 +129,7 @@ export const useVerifyProviderPhone = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -151,7 +151,7 @@ export const useVerifyProviderIdentity = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -173,7 +173,7 @@ export const useVerifyProviderProfessionalInfo = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -194,7 +194,7 @@ export const useAddServices = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -232,7 +232,7 @@ export const useDeleteService = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {
@@ -253,7 +253,7 @@ export const useUpdateService = () => {
     onSuccess: async (data) => {
       const userData = data?.data;
       dispatch(setUpdatedUser(userData));
-
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {

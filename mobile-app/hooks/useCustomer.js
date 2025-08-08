@@ -14,6 +14,7 @@ import {
 import { Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials, setUpdatedUser } from "../store/slices/authSlice";
+import { saveUserToStorage } from "../utils/storage";
 
 export const useRegisterCustomer = () => {
   return useMutation({
@@ -34,6 +35,7 @@ export const useRegisterCustomer = () => {
 };
 
 export const useUpdateCustomer = () => {
+  const { token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   return useMutation({
@@ -41,6 +43,7 @@ export const useUpdateCustomer = () => {
     mutationKey: ["update-customer"],
     onSuccess: (data) => {
       dispatch(setUpdatedUser(data?.data));
+      saveUserToStorage({ user: userData, token });
       Alert.alert("Success", data?.message);
     },
     onError: (error) => {

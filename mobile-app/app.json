@@ -13,9 +13,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -56,15 +54,6 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification_icon.png",
-          "color": "#ffffff",
-          "defaultChannel": "default",
-          "enableBackgroundRemoteNotifications": false
         }
       ],
       "react-native-edge-to-edge"

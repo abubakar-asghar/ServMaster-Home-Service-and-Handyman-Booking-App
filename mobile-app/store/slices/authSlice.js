@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { saveUserToStorage } from "../../utils/storage";
 
 const initialState = {
   user: null,
@@ -13,6 +14,9 @@ const authSlice = createSlice({
       const { user, token } = action.payload;
       state.user = user;
       state.token = token;
+
+      saveUserToStorage({ user, token });
+      console.log(user, token);
     },
     logoutUser: (state) => {
       state.user = null;
@@ -25,6 +29,8 @@ const authSlice = createSlice({
     },
     setUpdatedUser: (state, action) => {
       state.user = action.payload;
+
+      saveUserToStorage({ user: action.payload, token: state.token });
     },
   },
 });
